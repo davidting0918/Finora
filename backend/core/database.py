@@ -6,7 +6,7 @@ import os
 load_dotenv("backend/.env")
 
 class MongoAsyncClient:
-    def __init__(self, test_mode=False, test_db_url=None, test_db_name=None):
+    def __init__(self, test_mode: bool = False):
         """
         Initialize MongoDB async client
         
@@ -15,14 +15,8 @@ class MongoAsyncClient:
             test_db_url (str): Override database URL for testing
             test_db_name (str): Override database name for testing
         """
-        if test_mode:
-            # Use test database configuration
-            self.db_url = test_db_url or os.getenv("TEST_MONGO_URL", "mongodb://localhost:27017")
-            self.db_name = test_db_name or os.getenv("TEST_MONGO_DB_NAME", "gomoku_test")
-        else:
-            # Use production database configuration
-            self.db_url = os.getenv("MONGO_URL")
-            self.db_name = os.getenv("MONGO_DB_NAME")
+        self.db_url = os.getenv("MONGO_URL")
+        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if test_mode else "MONGO_DB_NAME")
         
         self.client = AsyncIOMotorClient(self.db_url)
         self.db = self.client[self.db_name]
