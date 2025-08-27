@@ -40,6 +40,14 @@ jobs:
         pip install pytest-cov
 
     - name: Run tests
+      env:
+        PYTEST_RUNNING: 1
+        MONGO_URL: ${{ secrets.MONGO_URL }}
+        MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+        MONGO_TEST_DB_NAME: ${{ secrets.MONGO_TEST_DB_NAME }}
+        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       run: |
         python -m pytest backend/tests/ -v --tb=short --cov=. --cov-report=xml --cov-report=term-missing
 
