@@ -1,15 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from backend.auth.router import router as auth_router
 from backend.user.router import router as user_router
+from backend.core.initializer import init_category
 from scalar_fastapi import get_scalar_api_reference
 
 import uvicorn 
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize categories on startup"""
+    await init_category()
+    yield
+
 app = FastAPI(
-    title="Gomoku Game API",
-    description="A complete Gomoku game backend API with user authentication and game management",
-    version="1.0.0"
+    title="Finora API",
+    description="A modern expense tracking platform with comprehensive financial management features",
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -27,7 +37,7 @@ app.include_router(user_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Welcome to Finora API!"}
 
 @app.get("/scalar")
 async def scalar():

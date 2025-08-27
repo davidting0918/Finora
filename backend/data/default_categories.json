@@ -1,0 +1,582 @@
+{
+  "categories": [
+    {
+      "id": "food_dining",
+      "name": "Food & Dining",
+      "type": "expense",
+      "color": "#FF6B6B",
+      "icon": "🍽️",
+      "is_active": true
+    },
+    {
+      "id": "transportation",
+      "name": "Transportation",
+      "type": "expense",
+      "color": "#4ECDC4",
+      "icon": "🚗",
+      "is_active": true
+    },
+    {
+      "id": "shopping",
+      "name": "Shopping",
+      "type": "expense",
+      "color": "#45B7D1",
+      "icon": "🛍️",
+      "is_active": true
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "type": "expense",
+      "color": "#96CEB4",
+      "icon": "🎮",
+      "is_active": true
+    },
+    {
+      "id": "bills_utilities",
+      "name": "Bills & Utilities",
+      "type": "expense",
+      "color": "#FECA57",
+      "icon": "💡",
+      "is_active": true
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare",
+      "type": "expense",
+      "color": "#FF9FF3",
+      "icon": "🏥",
+      "is_active": true
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "type": "expense",
+      "color": "#54A0FF",
+      "icon": "📚",
+      "is_active": true
+    },
+    {
+      "id": "salary",
+      "name": "Salary",
+      "type": "income",
+      "color": "#2ECC71",
+      "icon": "💰",
+      "is_active": true
+    },
+    {
+      "id": "business",
+      "name": "Business Income",
+      "type": "income",
+      "color": "#3498DB",
+      "icon": "🏢",
+      "is_active": true
+    },
+    {
+      "id": "investment",
+      "name": "Investment Returns",
+      "type": "income",
+      "color": "#9B59B6",
+      "icon": "📈",
+      "is_active": true
+    },
+    {
+      "id": "freelance",
+      "name": "Freelance",
+      "type": "income",
+      "color": "#E74C3C",
+      "icon": "💻",
+      "is_active": true
+    },
+    {
+      "id": "passive",
+      "name": "Passive Income",
+      "type": "income",
+      "color": "#F39C12",
+      "icon": "🎯",
+      "is_active": true
+    }
+  ],
+  "subcategories": [
+    {
+      "id": "restaurant",
+      "category_id": "food_dining",
+      "name": "Restaurant",
+      "color": "#FF6B6B",
+      "icon": "🍽️",
+      "is_active": true
+    },
+    {
+      "id": "fast_food",
+      "category_id": "food_dining",
+      "name": "Fast Food",
+      "color": "#FF6B6B",
+      "icon": "🍔",
+      "is_active": true
+    },
+    {
+      "id": "coffee",
+      "category_id": "food_dining",
+      "name": "Coffee",
+      "color": "#FF6B6B",
+      "icon": "☕",
+      "is_active": true
+    },
+    {
+      "id": "delivery",
+      "category_id": "food_dining",
+      "name": "Delivery",
+      "color": "#FF6B6B",
+      "icon": "🚚",
+      "is_active": true
+    },
+    {
+      "id": "groceries",
+      "category_id": "food_dining",
+      "name": "Groceries",
+      "color": "#FF6B6B",
+      "icon": "🛒",
+      "is_active": true
+    },
+    {
+      "id": "bus",
+      "category_id": "transportation",
+      "name": "Bus",
+      "color": "#4ECDC4",
+      "icon": "🚌",
+      "is_active": true
+    },
+    {
+      "id": "subway",
+      "category_id": "transportation",
+      "name": "Subway",
+      "color": "#4ECDC4",
+      "icon": "🚇",
+      "is_active": true
+    },
+    {
+      "id": "taxi",
+      "category_id": "transportation",
+      "name": "Taxi",
+      "color": "#4ECDC4",
+      "icon": "🚕",
+      "is_active": true
+    },
+    {
+      "id": "gas",
+      "category_id": "transportation",
+      "name": "Gas",
+      "color": "#4ECDC4",
+      "icon": "⛽",
+      "is_active": true
+    },
+    {
+      "id": "parking",
+      "category_id": "transportation",
+      "name": "Parking",
+      "color": "#4ECDC4",
+      "icon": "🅿️",
+      "is_active": true
+    },
+    {
+      "id": "clothing",
+      "category_id": "shopping",
+      "name": "Clothing",
+      "color": "#45B7D1",
+      "icon": "👕",
+      "is_active": true
+    },
+    {
+      "id": "electronics",
+      "category_id": "shopping",
+      "name": "Electronics",
+      "color": "#45B7D1",
+      "icon": "📱",
+      "is_active": true
+    },
+    {
+      "id": "home",
+      "category_id": "shopping",
+      "name": "Home",
+      "color": "#45B7D1",
+      "icon": "🏠",
+      "is_active": true
+    },
+    {
+      "id": "beauty",
+      "category_id": "shopping",
+      "name": "Beauty",
+      "color": "#45B7D1",
+      "icon": "💄",
+      "is_active": true
+    },
+    {
+      "id": "books",
+      "category_id": "shopping",
+      "name": "Books",
+      "color": "#45B7D1",
+      "icon": "📚",
+      "is_active": true
+    },
+    {
+      "id": "movies",
+      "category_id": "entertainment",
+      "name": "Movies",
+      "color": "#96CEB4",
+      "icon": "🎬",
+      "is_active": true
+    },
+    {
+      "id": "games",
+      "category_id": "entertainment",
+      "name": "Games",
+      "color": "#96CEB4",
+      "icon": "🎮",
+      "is_active": true
+    },
+    {
+      "id": "music",
+      "category_id": "entertainment",
+      "name": "Music",
+      "color": "#96CEB4",
+      "icon": "🎵",
+      "is_active": true
+    },
+    {
+      "id": "sports",
+      "category_id": "entertainment",
+      "name": "Sports",
+      "color": "#96CEB4",
+      "icon": "⚽",
+      "is_active": true
+    },
+    {
+      "id": "travel",
+      "category_id": "entertainment",
+      "name": "Travel",
+      "color": "#96CEB4",
+      "icon": "✈️",
+      "is_active": true
+    },
+    {
+      "id": "electricity",
+      "category_id": "bills_utilities",
+      "name": "Electricity",
+      "color": "#FECA57",
+      "icon": "💡",
+      "is_active": true
+    },
+    {
+      "id": "water",
+      "category_id": "bills_utilities",
+      "name": "Water",
+      "color": "#FECA57",
+      "icon": "💧",
+      "is_active": true
+    },
+    {
+      "id": "gas_bill",
+      "category_id": "bills_utilities",
+      "name": "Gas",
+      "color": "#FECA57",
+      "icon": "🔥",
+      "is_active": true
+    },
+    {
+      "id": "internet",
+      "category_id": "bills_utilities",
+      "name": "Internet",
+      "color": "#FECA57",
+      "icon": "🌐",
+      "is_active": true
+    },
+    {
+      "id": "phone",
+      "category_id": "bills_utilities",
+      "name": "Phone",
+      "color": "#FECA57",
+      "icon": "📞",
+      "is_active": true
+    },
+    {
+      "id": "doctor",
+      "category_id": "healthcare",
+      "name": "Doctor",
+      "color": "#FF9FF3",
+      "icon": "👨‍⚕️",
+      "is_active": true
+    },
+    {
+      "id": "medicine",
+      "category_id": "healthcare",
+      "name": "Medicine",
+      "color": "#FF9FF3",
+      "icon": "💊",
+      "is_active": true
+    },
+    {
+      "id": "insurance",
+      "category_id": "healthcare",
+      "name": "Insurance",
+      "color": "#FF9FF3",
+      "icon": "🛡️",
+      "is_active": true
+    },
+    {
+      "id": "checkup",
+      "category_id": "healthcare",
+      "name": "Checkup",
+      "color": "#FF9FF3",
+      "icon": "🩺",
+      "is_active": true
+    },
+    {
+      "id": "dental",
+      "category_id": "healthcare",
+      "name": "Dental",
+      "color": "#FF9FF3",
+      "icon": "🦷",
+      "is_active": true
+    },
+    {
+      "id": "tuition",
+      "category_id": "education",
+      "name": "Tuition",
+      "color": "#54A0FF",
+      "icon": "🎓",
+      "is_active": true
+    },
+    {
+      "id": "courses",
+      "category_id": "education",
+      "name": "Courses",
+      "color": "#54A0FF",
+      "icon": "📖",
+      "is_active": true
+    },
+    {
+      "id": "books_edu",
+      "category_id": "education",
+      "name": "Books",
+      "color": "#54A0FF",
+      "icon": "📚",
+      "is_active": true
+    },
+    {
+      "id": "tutoring",
+      "category_id": "education",
+      "name": "Tutoring",
+      "color": "#54A0FF",
+      "icon": "👨‍🏫",
+      "is_active": true
+    },
+    {
+      "id": "certification",
+      "category_id": "education",
+      "name": "Certification",
+      "color": "#54A0FF",
+      "icon": "📜",
+      "is_active": true
+    },
+    {
+      "id": "base_salary",
+      "category_id": "salary",
+      "name": "Base Salary",
+      "color": "#2ECC71",
+      "icon": "💰",
+      "is_active": true
+    },
+    {
+      "id": "bonus",
+      "category_id": "salary",
+      "name": "Bonus",
+      "color": "#2ECC71",
+      "icon": "🎁",
+      "is_active": true
+    },
+    {
+      "id": "overtime",
+      "category_id": "salary",
+      "name": "Overtime",
+      "color": "#2ECC71",
+      "icon": "⏰",
+      "is_active": true
+    },
+    {
+      "id": "allowance",
+      "category_id": "salary",
+      "name": "Allowance",
+      "color": "#2ECC71",
+      "icon": "💵",
+      "is_active": true
+    },
+    {
+      "id": "year_end_bonus",
+      "category_id": "salary",
+      "name": "Year-end Bonus",
+      "color": "#2ECC71",
+      "icon": "🎉",
+      "is_active": true
+    },
+    {
+      "id": "sales",
+      "category_id": "business",
+      "name": "Sales",
+      "color": "#3498DB",
+      "icon": "💼",
+      "is_active": true
+    },
+    {
+      "id": "services",
+      "category_id": "business",
+      "name": "Services",
+      "color": "#3498DB",
+      "icon": "🔧",
+      "is_active": true
+    },
+    {
+      "id": "consulting",
+      "category_id": "business",
+      "name": "Consulting",
+      "color": "#3498DB",
+      "icon": "📊",
+      "is_active": true
+    },
+    {
+      "id": "partnership",
+      "category_id": "business",
+      "name": "Partnership",
+      "color": "#3498DB",
+      "icon": "🤝",
+      "is_active": true
+    },
+    {
+      "id": "commission",
+      "category_id": "business",
+      "name": "Commission",
+      "color": "#3498DB",
+      "icon": "💱",
+      "is_active": true
+    },
+    {
+      "id": "stocks",
+      "category_id": "investment",
+      "name": "Stocks",
+      "color": "#9B59B6",
+      "icon": "📈",
+      "is_active": true
+    },
+    {
+      "id": "mutual_funds",
+      "category_id": "investment",
+      "name": "Mutual Funds",
+      "color": "#9B59B6",
+      "icon": "📊",
+      "is_active": true
+    },
+    {
+      "id": "bonds",
+      "category_id": "investment",
+      "name": "Bonds",
+      "color": "#9B59B6",
+      "icon": "📜",
+      "is_active": true
+    },
+    {
+      "id": "real_estate",
+      "category_id": "investment",
+      "name": "Real Estate",
+      "color": "#9B59B6",
+      "icon": "🏠",
+      "is_active": true
+    },
+    {
+      "id": "cryptocurrency",
+      "category_id": "investment",
+      "name": "Cryptocurrency",
+      "color": "#9B59B6",
+      "icon": "₿",
+      "is_active": true
+    },
+    {
+      "id": "design",
+      "category_id": "freelance",
+      "name": "Design",
+      "color": "#E74C3C",
+      "icon": "🎨",
+      "is_active": true
+    },
+    {
+      "id": "programming",
+      "category_id": "freelance",
+      "name": "Programming",
+      "color": "#E74C3C",
+      "icon": "💻",
+      "is_active": true
+    },
+    {
+      "id": "writing",
+      "category_id": "freelance",
+      "name": "Writing",
+      "color": "#E74C3C",
+      "icon": "✍️",
+      "is_active": true
+    },
+    {
+      "id": "translation",
+      "category_id": "freelance",
+      "name": "Translation",
+      "color": "#E74C3C",
+      "icon": "🌐",
+      "is_active": true
+    },
+    {
+      "id": "consulting_freelance",
+      "category_id": "freelance",
+      "name": "Consulting",
+      "color": "#E74C3C",
+      "icon": "💡",
+      "is_active": true
+    },
+    {
+      "id": "rent",
+      "category_id": "passive",
+      "name": "Rent",
+      "color": "#F39C12",
+      "icon": "🏠",
+      "is_active": true
+    },
+    {
+      "id": "royalties",
+      "category_id": "passive",
+      "name": "Royalties",
+      "color": "#F39C12",
+      "icon": "👑",
+      "is_active": true
+    },
+    {
+      "id": "interest",
+      "category_id": "passive",
+      "name": "Interest",
+      "color": "#F39C12",
+      "icon": "🏛️",
+      "is_active": true
+    },
+    {
+      "id": "dividends",
+      "category_id": "passive",
+      "name": "Dividends",
+      "color": "#F39C12",
+      "icon": "💎",
+      "is_active": true
+    },
+    {
+      "id": "licensing",
+      "category_id": "passive",
+      "name": "Licensing",
+      "color": "#F39C12",
+      "icon": "📄",
+      "is_active": true
+    }
+  ]
+}
