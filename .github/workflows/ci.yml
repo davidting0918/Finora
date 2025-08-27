@@ -41,8 +41,7 @@ jobs:
 
     - name: Run tests
       run: |
-        cd backend
-        python -m pytest tests/ -v --tb=short --cov=. --cov-report=xml --cov-report=term-missing
+        python -m pytest backend/tests/ -v --tb=short --cov=. --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage report
       uses: codecov/codecov-action@v3
