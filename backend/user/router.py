@@ -27,7 +27,7 @@ async def create_user(request: CreateUserRequest) -> dict:
             "message": "User registered successfully"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise e
 
 # Protected endpoint - JWT token required
 @router.get("/me")
@@ -52,4 +52,4 @@ async def get_current_user_info(
             "message": f"Welcome, {current_user.name}!"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise e

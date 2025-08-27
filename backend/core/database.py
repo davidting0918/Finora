@@ -6,7 +6,7 @@ import os
 load_dotenv("backend/.env")
 
 class MongoAsyncClient:
-    def __init__(self, test_mode: bool = False):
+    def __init__(self, test_mode: bool = None):
         """
         Initialize MongoDB async client
         
@@ -15,10 +15,21 @@ class MongoAsyncClient:
             test_db_url (str): Override database URL for testing
             test_db_name (str): Override database name for testing
         """
+        if test_mode is None:
+            test_mode = os.getenv("PYTEST_RUNNING") == "1"
+
+        self.test_mode = test_mode  
+
         self.db_url = os.getenv("MONGO_URL")
-        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if test_mode else "MONGO_DB_NAME")
+        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if self.test_mode else "MONGO_DB_NAME")
         
         self.client = AsyncIOMotorClient(self.db_url)
+        self.db = self.client[self.db_name]
+
+    def reload(self):
+        test_mode = os.getenv("PYTEST_RUNNING") == "1"
+        self.test_mode = test_mode
+        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if self.test_mode else "MONGO_DB_NAME")
         self.db = self.client[self.db_name]
 
     def list_collections(self):

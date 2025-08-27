@@ -21,6 +21,7 @@ _db = MongoAsyncClient()
 class AuthService:
     def __init__(self):
         self.db = _db
+        self.db.reload()
         self.google_provider = GoogleAuthProvider(
             client_id=os.getenv("GOOGLE_CLIENT_ID"),
             client_secret=os.getenv("GOOGLE_CLIENT_SECRET")

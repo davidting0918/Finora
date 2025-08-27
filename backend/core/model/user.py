@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
 
 user_collection = "users"
@@ -28,33 +28,35 @@ class CreateUserRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
     pwd: str = Field(..., min_length=8, max_length=128)
     
-    @validator('pwd')
+    @field_validator('pwd')
+    @classmethod
     def validate_password(cls, v):
         """
-        強密碼政策：
-        - 至少8個字符
-        - 至少包含一個大寫字母
-        - 至少包含一個小寫字母
-        - 至少包含一個數字
-        - 至少包含一個特殊字符
+        Strong password policy:
+        - At least 8 characters
+        - At least one uppercase letter
+        - At least one lowercase letter
+        - At least one digit
+        - At least one special character
         """
         if len(v) < 8:
-            raise ValueError('密碼至少需要8個字符')
+            raise ValueError('Password must be at least 8 characters long')
         if not re.search(r'[A-Z]', v):
-            raise ValueError('密碼必須包含至少一個大寫字母')
+            raise ValueError('Password must contain at least one uppercase letter')
         if not re.search(r'[a-z]', v):
-            raise ValueError('密碼必須包含至少一個小寫字母')
+            raise ValueError('Password must contain at least one lowercase letter')
         if not re.search(r'\d', v):
-            raise ValueError('密碼必須包含至少一個數字')
+            raise ValueError('Password must contain at least one digit')
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
-            raise ValueError('密碼必須包含至少一個特殊字符')
+            raise ValueError('Password must contain at least one special character')
         return v
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
-        """驗證用戶名格式"""
+        """Validate username format"""
         if not v.strip():
-            raise ValueError('用戶名不能為空')
+            raise ValueError('Username cannot be empty')
         if len(v.strip()) < 2:
-            raise ValueError('用戶名至少需要2個字符')
+            raise ValueError('Username must be at least 2 characters long')
         return v.strip()
