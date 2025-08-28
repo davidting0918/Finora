@@ -20,7 +20,7 @@ async def init_category():
         existing_subcategories = len(await db.find_many(subcategory_collection, {}))
         
         if existing_categories > 0 or existing_subcategories > 0:
-            logger.info(f"Categories already exist (categories: {existing_categories}, subcategories: {existing_subcategories}), skipping initialization")
+            logger.warning(f"Categories already exist (categories: {existing_categories}, subcategories: {existing_subcategories}), skipping initialization")
             return
         
         # Get path to JSON file

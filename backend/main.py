@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from backend.auth.router import router as auth_router
 from backend.user.router import router as user_router
+from backend.transaction.router import router as transaction_router
 from backend.core.initializer import init_category
 from scalar_fastapi import get_scalar_api_reference
 
@@ -34,6 +35,7 @@ app.add_middleware(
 # Register routers
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(transaction_router)
 
 @app.get("/")
 async def root():

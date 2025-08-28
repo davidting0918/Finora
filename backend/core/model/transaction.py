@@ -17,6 +17,7 @@ class TransactionType(Enum):
 class Transaction(BaseModel):
     id: str
     user_id: str
+    user_name: str
     type: TransactionType
     amount: Decimal
     transaction_date: datetime
@@ -85,3 +86,14 @@ class Category(BaseModel):
         return v.strip()
 
 
+# API related model
+
+class CreateTransactionRequest(BaseModel):
+    type: TransactionType
+    amount: Decimal
+    transaction_date: datetime
+    category_id: str
+    subcategory_id: str
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None

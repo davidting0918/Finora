@@ -1,0 +1,23 @@
+{
+    "users": [
+        {
+            "email": "test@test.com",
+            "name": "test",
+            "pwd": "Test123%"
+        }
+    ],
+    "transactions": [
+        {
+            "type": "expense",
+            "amount": 1000,
+            "transaction_date": "2025-01-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast",
+            "description": "Breakfast",
+            "notes": "7-11",
+            "tags": [
+              "test tag"
+            ]
+          }
+    ]
+}

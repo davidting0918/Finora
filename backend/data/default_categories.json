@@ -99,41 +99,41 @@
   ],
   "subcategories": [
     {
-      "id": "restaurant",
+      "id": "breakfast",
       "category_id": "food_dining",
-      "name": "Restaurant",
+      "name": "Breakfast",
       "color": "#FF6B6B",
-      "icon": "🍽️",
+      "icon": "🥐",
       "is_active": true
     },
     {
-      "id": "fast_food",
+      "id": "lunch",
       "category_id": "food_dining",
-      "name": "Fast Food",
+      "name": "Lunch",
       "color": "#FF6B6B",
-      "icon": "🍔",
+      "icon": "�",
       "is_active": true
     },
     {
-      "id": "coffee",
+      "id": "dinner",
       "category_id": "food_dining",
-      "name": "Coffee",
+      "name": "Dinner",
       "color": "#FF6B6B",
       "icon": "☕",
       "is_active": true
     },
     {
-      "id": "delivery",
+      "id": "snack",
       "category_id": "food_dining",
-      "name": "Delivery",
+      "name": "Snack",
       "color": "#FF6B6B",
       "icon": "🚚",
       "is_active": true
     },
     {
-      "id": "groceries",
+      "id": "drink",
       "category_id": "food_dining",
-      "name": "Groceries",
+      "name": "Drink",
       "color": "#FF6B6B",
       "icon": "🛒",
       "is_active": true
