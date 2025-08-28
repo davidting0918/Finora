@@ -11,6 +11,9 @@ from backend.main import app
 from backend.core.database import MongoAsyncClient
 from backend.core.model.user import user_collection
 from backend.core.model.auth import access_token_collection
+from backend.core.model.transaction import transaction_collection
+from backend.core.model.transaction import category_collection
+from backend.core.model.transaction import subcategory_collection
 
 # Global variable to track session cleanup
 _session_db_client = None
@@ -107,6 +110,9 @@ async def cleanup_test_db(db_client):
             return
         await db_client.delete_many(user_collection, {})
         await db_client.delete_many(access_token_collection, {})
+        await db_client.delete_many(transaction_collection, {})
+        await db_client.delete_many(category_collection, {})
+        await db_client.delete_many(subcategory_collection, {})
     except Exception as e:
         print(f"Error cleaning test database: {e}")
 
