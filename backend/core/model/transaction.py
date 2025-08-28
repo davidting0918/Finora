@@ -1,6 +1,5 @@
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
-from decimal import Decimal
 from datetime import datetime
 from enum import Enum
 
@@ -13,16 +12,97 @@ class TransactionType(Enum):
     income = "income"
     expense = "expense"
 
+class Currency(Enum):
+    USD = "USD"
+    JPY = "JPY"
+    KRW = "KRW"
+    CNY = "CNY"
+    EUR = "EUR"
+    GBP = "GBP"
+    CAD = "CAD"
+    HKD = "HKD"
+    TWD = "TWD"
+
+class CategoryId(Enum):
+    #expense
+    shopping = "shopping"
+    food_dining = "food_dining"
+    transportation = "transportation"
+    entertainment = "entertainment"
+    living = "living"
+    education = "education"
+    health = "health"
+    investment = "investment"
+    travel = "travel" 
+
+    # income
+    income = "income"
+
+    # other
+    other = "other"
+
+class SubCategoryId(Enum):
+    # food_dining
+    breakfast = "breakfast"
+    lunch = "lunch"
+    dinner = "dinner"
+    snack = "snack"
+    drink = "drink"
+
+    # shopping
+    clothing = "clothing"
+    electronics = "electronics"
+    home_goods = "home_goods"
+
+    # transportation
+    ticket = "ticket"
+    bus = "bus"
+    train = "train"
+    taxi = "taxi"
+    parking = "parking"
+
+    # entertainment
+    movie = "movie"
+    concert = "concert"
+    sports = "sports"
+    game = "game"
+
+    # living
+    rent = "rent"
+    mortgage = "mortgage"
+    telecom = "telecom"
+
+    # education
+    tuition = "tuition"
+    software = "software"
+
+    # health
+    medical = "medical"
+    insurance = "insurance"
+
+    # investment
+    stock = "stock"
+    mutual_fund = "mutual_fund"
+    crypto = "crypto"
+
+    # travel
+    hotel = "hotel"
+    flight = "flight"
+
+    # other
+    other = "other"
+
 
 class Transaction(BaseModel):
     id: str
     user_id: str
     user_name: str
     type: TransactionType
-    amount: Decimal
+    currency: Currency = Currency.TWD
+    amount: float
     transaction_date: datetime
-    category_id: str
-    subcategory_id: str
+    category_id: CategoryId
+    subcategory_id: SubCategoryId
     description: Optional[str] = None
     notes: Optional[str] = None
     tags: Optional[List[str]] = None
@@ -90,10 +170,11 @@ class Category(BaseModel):
 
 class CreateTransactionRequest(BaseModel):
     type: TransactionType
-    amount: Decimal
+    currency: Currency = Currency.TWD
+    amount: float
     transaction_date: datetime
-    category_id: str
-    subcategory_id: str
+    category_id: CategoryId
+    subcategory_id: SubCategoryId
     description: Optional[str] = None
     notes: Optional[str] = None
     tags: Optional[List[str]] = None

@@ -9,6 +9,7 @@
     "transactions": [
         {
             "type": "expense",
+            "currency": "TWD",
             "amount": 1000,
             "transaction_date": "2025-01-01",
             "category_id": "food_dining",
@@ -18,6 +19,6 @@
             "tags": [
               "test tag"
             ]
-          }
+        }
     ]
 }

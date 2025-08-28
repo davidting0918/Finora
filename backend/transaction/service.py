@@ -4,10 +4,25 @@ from datetime import datetime as dt, timezone as tz, timedelta as td
 from backend.core.model.user import User
 import secrets
 from fastapi import HTTPException
+import json
 
 class TransactionService:
     def __init__(self):
         self.db = MongoAsyncClient()
+        self.cat_map = self._init_category_map()
+
+    @staticmethod
+    def _init_category_map():
+        with open("backend/data/default_categories.json", "r") as f:
+            data = json.load(f)
+        cat_map = {}
+
+        for cat in data["categories"]:
+            cat_map[cat["id"]] = cat
+            cat_map[cat['id']]['subcategories'] = []
+        for subcat in data["subcategories"]:
+            cat_map[subcat['category_id']]['subcategories'].append(subcat)
+        return cat_map
 
     @staticmethod
     def _new_transaction_id():
@@ -15,18 +30,19 @@ class TransactionService:
     
     async def create_transaction(self, request: CreateTransactionRequest, current_user: User):
         # check if category and subcategory exist
-        category = await self.db.find_one("categories", {"id": request.category_id})
-        if not category:
+        if request.category_id not in self.cat_map:
             raise HTTPException(status_code=404, detail=f"Category {request.category_id} not found")
-        subcategory = await self.db.find_one("subcategories", {"id": request.subcategory_id})
-        if not subcategory:
+
+        if request.subcategory_id not in self.cat_map[request.category_id]['subcategories']:
             raise HTTPException(status_code=404, detail=f"Subcategory {request.subcategory_id} not found")
-        
+
+
         transaction = Transaction(
             id=self._new_transaction_id(),
             user_id=current_user.id,
             user_name=current_user.name,
             type=request.type,
+            currency=request.currency,
             amount=request.amount,
             transaction_date=request.transaction_date,
             category_id=request.category_id,
