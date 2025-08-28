@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime as dt, timezone as tz, timedelta as td
 from enum import Enum
 
 # Database collection names
@@ -93,43 +93,7 @@ class SubCategoryId(Enum):
     other = "other"
 
 
-class Transaction(BaseModel):
-    id: str
-    user_id: str
-    user_name: str
-    type: TransactionType
-    currency: Currency = Currency.TWD
-    amount: float
-    transaction_date: datetime
-    category_id: CategoryId
-    subcategory_id: SubCategoryId
-    description: Optional[str] = None
-    notes: Optional[str] = None
-    tags: Optional[List[str]] = None
-    created_at: int
-    updated_at: int
-    is_deleted: bool = False
-    
-    @field_validator('amount')
-    @classmethod
-    def validate_amount(cls, v):
-        if v <= 0:
-            raise ValueError('Amount must be greater than 0')
-        return v
-    
-    @field_validator('description')
-    @classmethod
-    def validate_description(cls, v):
-        if v and len(v) > 200:
-            raise ValueError('Description must be 200 characters or less')
-        return v
-    
-    @field_validator('notes')
-    @classmethod
-    def validate_notes(cls, v):
-        if v and len(v) > 500:
-            raise ValueError('Notes must be 500 characters or less')
-        return v
+
 
 class SubCategory(BaseModel):
     id: str
@@ -172,9 +136,65 @@ class CreateTransactionRequest(BaseModel):
     type: TransactionType
     currency: Currency = Currency.TWD
     amount: float
-    transaction_date: datetime
+    transaction_date: dt
     category_id: CategoryId
     subcategory_id: SubCategoryId
     description: Optional[str] = None
     notes: Optional[str] = None
     tags: Optional[List[str]] = None
+
+class UpdateTransactionRequest(BaseModel):
+    type: Optional[TransactionType] = None
+    currency: Optional[Currency] = None
+    amount: Optional[float] = None
+    transaction_date: Optional[dt] = None
+    category_id: Optional[CategoryId] = None
+    subcategory_id: Optional[SubCategoryId] = None
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class Transaction(BaseModel):
+    id: str
+    user_id: str
+    user_name: str
+    type: TransactionType
+    currency: Currency = Currency.TWD
+    amount: float
+    transaction_date: dt
+    category_id: CategoryId
+    subcategory_id: SubCategoryId
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+    created_at: int
+    updated_at: int
+    is_deleted: bool = False
+    
+    @field_validator('amount')
+    @classmethod
+    def validate_amount(cls, v):
+        if v <= 0:
+            raise ValueError('Amount must be greater than 0')
+        return v
+    
+    @field_validator('description')
+    @classmethod
+    def validate_description(cls, v):
+        if v and len(v) > 200:
+            raise ValueError('Description must be 200 characters or less')
+        return v
+    
+    @field_validator('notes')
+    @classmethod
+    def validate_notes(cls, v):
+        if v and len(v) > 500:
+            raise ValueError('Notes must be 500 characters or less')
+        return v
+    
+    def update(self, request: UpdateTransactionRequest):
+        for key, value in request.model_dump(mode='json').items():
+            if value is not None:
+                setattr(self, key, value)
+        self.updated_at = int(dt.now(tz.utc).timestamp())

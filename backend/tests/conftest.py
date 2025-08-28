@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from backend.main import app
 from backend.core.database import MongoAsyncClient
+from backend.core.initializer import init_category
 from backend.core.model.user import user_collection
 from backend.core.model.auth import access_token_collection
 from backend.core.model.transaction import transaction_collection
@@ -115,6 +116,16 @@ async def cleanup_test_db(db_client):
         await db_client.delete_many(subcategory_collection, {})
     except Exception as e:
         print(f"Error cleaning test database: {e}")
+
+@pytest_asyncio.fixture(scope="function")
+async def init_category_for_test():
+    """Initialize categories for testing"""
+    try:
+        await init_category()
+        yield
+    except Exception as e:
+        print(f"Warning: Category initialization failed in tests: {e}")
+        yield
 
 @pytest.fixture(scope="function")
 def sample_user_data():
