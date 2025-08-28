@@ -125,6 +125,24 @@ def sample_user_data():
         }
     }
 
+@pytest.fixture(scope="function")
+def sample_transaction_data():
+    return {
+        "transaction1": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast",
+            "description": "Breakfast",
+            "notes": "7-11",
+            "tags": [
+              "test tag"
+            ]
+        }
+    }
+
 # Register cleanup function to run at Python exit
 def final_cleanup():
     """Emergency cleanup function for Python exit"""

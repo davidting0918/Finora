@@ -17,7 +17,23 @@ async def create_transaction_route(request: CreateTransactionRequest, current_us
         return {
             "status": 1,
             "data": transaction.model_dump(mode='json'),
-            "message": f"Transaction {transaction.id} created successfully"
+            "message": "Transaction created successfully"
         }
     except Exception as e:
         raise e
+
+@router.get("/category")
+async def get_categories_route():
+    return {
+        "status": 1,
+        "message": "Categories fetched successfully",
+        "data": transaction_service.cat_map
+    }
+
+@router.get("/subcategory/{category_id}")
+async def get_subcategories_route(category_id: str):
+    return {
+        "status": 1,
+        "message": "Subcategories fetched successfully",
+        "data": transaction_service.cat_map[category_id]['subcategories']
+    }

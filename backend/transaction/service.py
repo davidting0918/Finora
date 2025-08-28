@@ -19,9 +19,9 @@ class TransactionService:
 
         for cat in data["categories"]:
             cat_map[cat["id"]] = cat
-            cat_map[cat['id']]['subcategories'] = []
+            cat_map[cat['id']]['subcategories'] = {}
         for subcat in data["subcategories"]:
-            cat_map[subcat['category_id']]['subcategories'].append(subcat)
+            cat_map[subcat['category_id']]['subcategories'][subcat['id']] = subcat
         return cat_map
 
     @staticmethod
@@ -30,10 +30,10 @@ class TransactionService:
     
     async def create_transaction(self, request: CreateTransactionRequest, current_user: User):
         # check if category and subcategory exist
-        if request.category_id not in self.cat_map:
+        if request.category_id.value not in self.cat_map:
             raise HTTPException(status_code=404, detail=f"Category {request.category_id} not found")
 
-        if request.subcategory_id not in self.cat_map[request.category_id]['subcategories']:
+        if request.subcategory_id.value not in self.cat_map[request.category_id.value]['subcategories']:
             raise HTTPException(status_code=404, detail=f"Subcategory {request.subcategory_id} not found")
 
 
