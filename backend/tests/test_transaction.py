@@ -61,3 +61,13 @@ class TestTransaction:
         data = response.json()
         assert data["status"] == 1
         assert data["message"] == "Transaction created successfully"
+
+        response = await async_client.get(
+            "/transaction/info/{}".format(data["data"]["id"]),
+            headers=headers
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["status"] == 1
+        assert data["message"] == "Transaction fetched successfully"
+

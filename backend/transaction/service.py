@@ -67,7 +67,7 @@ class TransactionService:
         )
         if not transaction:
             raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} not found")
-
+        transaction = Transaction(**transaction)
         return transaction
     
     async def update_transaction(self, transaction_id: str, request: UpdateTransactionRequest, current_user: User):
