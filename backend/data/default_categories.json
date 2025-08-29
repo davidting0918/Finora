@@ -1,0 +1,414 @@
+{
+  "categories": [
+    {
+      "id": "shopping",
+      "name": "Shopping",
+      "type": "expense",
+      "color": "#FFA726",
+      "icon": "🛍️",
+      "is_active": true
+    },
+    {
+      "id": "food_dining",
+      "name": "Food & Dining",
+      "type": "expense",
+      "color": "#FF7043",
+      "icon": "🍔",
+      "is_active": true
+    },
+    {
+      "id": "transportation",
+      "name": "Transportation",
+      "type": "expense",
+      "color": "#29B6F6",
+      "icon": "🚌",
+      "is_active": true
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "type": "expense",
+      "color": "#66BB6A",
+      "icon": "🎬",
+      "is_active": true
+    },
+    {
+      "id": "living",
+      "name": "Living Expenses",
+      "type": "expense",
+      "color": "#8D6E63",
+      "icon": "🏠",
+      "is_active": true
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "type": "expense",
+      "color": "#42A5F5",
+      "icon": "🎓",
+      "is_active": true
+    },
+    {
+      "id": "health",
+      "name": "Health & Medical",
+      "type": "expense",
+      "color": "#AB47BC",
+      "icon": "🏥",
+      "is_active": true
+    },
+    {
+      "id": "investment",
+      "name": "Investment",
+      "type": "expense",
+      "color": "#8E24AA",
+      "icon": "📈",
+      "is_active": true
+    },
+    {
+      "id": "travel",
+      "name": "Travel",
+      "type": "expense",
+      "color": "#795548",
+      "icon": "✈️",
+      "is_active": true
+    },
+    {
+      "id": "income",
+      "name": "Income",
+      "type": "income",
+      "color": "#43A047",
+      "icon": "💰",
+      "is_active": true
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "type": "expense",
+      "color": "#9E9E9E",
+      "icon": "❓",
+      "is_active": true
+    }
+  ],
+  "subcategories": [
+    {
+      "id": "breakfast",
+      "category_id": "food_dining",
+      "name": "Breakfast",
+      "color": "#FF7043",
+      "icon": "🥞",
+      "is_active": true
+    },
+    {
+      "id": "lunch",
+      "category_id": "food_dining",
+      "name": "Lunch",
+      "color": "#FF7043",
+      "icon": "🍱",
+      "is_active": true
+    },
+    {
+      "id": "dinner",
+      "category_id": "food_dining",
+      "name": "Dinner",
+      "color": "#FF7043",
+      "icon": "🍽️",
+      "is_active": true
+    },
+    {
+      "id": "snack",
+      "category_id": "food_dining",
+      "name": "Snack",
+      "color": "#FF7043",
+      "icon": "🍿",
+      "is_active": true
+    },
+    {
+      "id": "drink",
+      "category_id": "food_dining",
+      "name": "Drink",
+      "color": "#FF7043",
+      "icon": "🥤",
+      "is_active": true
+    },
+    {
+      "id": "food_dining_other",
+      "category_id": "food_dining",
+      "name": "Other",
+      "color": "#FF7043",
+      "icon": "🍴",
+      "is_active": true
+    },
+    {
+      "id": "clothing",
+      "category_id": "shopping",
+      "name": "Clothing",
+      "color": "#FFA726",
+      "icon": "👗",
+      "is_active": true
+    },
+    {
+      "id": "electronics",
+      "category_id": "shopping",
+      "name": "Electronics",
+      "color": "#FFA726",
+      "icon": "📱",
+      "is_active": true
+    },
+    {
+      "id": "home_goods",
+      "category_id": "shopping",
+      "name": "Home Goods",
+      "color": "#FFA726",
+      "icon": "🏡",
+      "is_active": true
+    },
+    {
+      "id": "shopping_other",
+      "category_id": "shopping",
+      "name": "Other",
+      "color": "#FFA726",
+      "icon": "🛒",
+      "is_active": true
+    },
+    {
+      "id": "ticket",
+      "category_id": "transportation",
+      "name": "Ticket",
+      "color": "#29B6F6",
+      "icon": "🎫",
+      "is_active": true
+    },
+    {
+      "id": "bus",
+      "category_id": "transportation",
+      "name": "Bus",
+      "color": "#29B6F6",
+      "icon": "🚌",
+      "is_active": true
+    },
+    {
+      "id": "train",
+      "category_id": "transportation",
+      "name": "Train",
+      "color": "#29B6F6",
+      "icon": "🚊",
+      "is_active": true
+    },
+    {
+      "id": "taxi",
+      "category_id": "transportation",
+      "name": "Taxi",
+      "color": "#29B6F6",
+      "icon": "🚕",
+      "is_active": true
+    },
+    {
+      "id": "parking",
+      "category_id": "transportation",
+      "name": "Parking",
+      "color": "#29B6F6",
+      "icon": "🅿️",
+      "is_active": true
+    },
+    {
+      "id": "transportation_other",
+      "category_id": "transportation",
+      "name": "Other",
+      "color": "#29B6F6",
+      "icon": "🚗",
+      "is_active": true
+    },
+    {
+      "id": "movie",
+      "category_id": "entertainment",
+      "name": "Movie",
+      "color": "#66BB6A",
+      "icon": "🎬",
+      "is_active": true
+    },
+    {
+      "id": "concert",
+      "category_id": "entertainment",
+      "name": "Concert",
+      "color": "#66BB6A",
+      "icon": "🎵",
+      "is_active": true
+    },
+    {
+      "id": "sports",
+      "category_id": "entertainment",
+      "name": "Sports",
+      "color": "#66BB6A",
+      "icon": "⚽",
+      "is_active": true
+    },
+    {
+      "id": "game",
+      "category_id": "entertainment",
+      "name": "Game",
+      "color": "#66BB6A",
+      "icon": "🎮",
+      "is_active": true
+    },
+    {
+      "id": "entertainment_other",
+      "category_id": "entertainment",
+      "name": "Other",
+      "color": "#66BB6A",
+      "icon": "🎪",
+      "is_active": true
+    },
+    {
+      "id": "rent",
+      "category_id": "living",
+      "name": "Rent",
+      "color": "#8D6E63",
+      "icon": "🏠",
+      "is_active": true
+    },
+    {
+      "id": "mortgage",
+      "category_id": "living",
+      "name": "Mortgage",
+      "color": "#8D6E63",
+      "icon": "🏦",
+      "is_active": true
+    },
+    {
+      "id": "telecom",
+      "category_id": "living",
+      "name": "Telecom",
+      "color": "#8D6E63",
+      "icon": "📞",
+      "is_active": true
+    },
+    {
+      "id": "living_other",
+      "category_id": "living",
+      "name": "Other",
+      "color": "#8D6E63",
+      "icon": "🔧",
+      "is_active": true
+    },
+    {
+      "id": "tuition",
+      "category_id": "education",
+      "name": "Tuition",
+      "color": "#42A5F5",
+      "icon": "📚",
+      "is_active": true
+    },
+    {
+      "id": "software",
+      "category_id": "education",
+      "name": "Software",
+      "color": "#42A5F5",
+      "icon": "💻",
+      "is_active": true
+    },
+    {
+      "id": "education_other",
+      "category_id": "education",
+      "name": "Other",
+      "color": "#42A5F5",
+      "icon": "📖",
+      "is_active": true
+    },
+    {
+      "id": "medical",
+      "category_id": "health",
+      "name": "Medical",
+      "color": "#AB47BC",
+      "icon": "👨‍⚕️",
+      "is_active": true
+    },
+    {
+      "id": "insurance",
+      "category_id": "health",
+      "name": "Insurance",
+      "color": "#AB47BC",
+      "icon": "🛡️",
+      "is_active": true
+    },
+    {
+      "id": "health_other",
+      "category_id": "health",
+      "name": "Other",
+      "color": "#AB47BC",
+      "icon": "💊",
+      "is_active": true
+    },
+    {
+      "id": "stock",
+      "category_id": "investment",
+      "name": "Stock",
+      "color": "#8E24AA",
+      "icon": "📈",
+      "is_active": true
+    },
+    {
+      "id": "mutual_fund",
+      "category_id": "investment",
+      "name": "Mutual Fund",
+      "color": "#8E24AA",
+      "icon": "📊",
+      "is_active": true
+    },
+    {
+      "id": "crypto",
+      "category_id": "investment",
+      "name": "Cryptocurrency",
+      "color": "#8E24AA",
+      "icon": "₿",
+      "is_active": true
+    },
+    {
+      "id": "investment_other",
+      "category_id": "investment",
+      "name": "Other",
+      "color": "#8E24AA",
+      "icon": "💎",
+      "is_active": true
+    },
+    {
+      "id": "hotel",
+      "category_id": "travel",
+      "name": "Hotel",
+      "color": "#795548",
+      "icon": "🏨",
+      "is_active": true
+    },
+    {
+      "id": "flight",
+      "category_id": "travel",
+      "name": "Flight",
+      "color": "#795548",
+      "icon": "✈️",
+      "is_active": true
+    },
+    {
+      "id": "travel_other",
+      "category_id": "travel",
+      "name": "Other",
+      "color": "#795548",
+      "icon": "🧳",
+      "is_active": true
+    },
+    {
+      "id": "income_other",
+      "category_id": "income",
+      "name": "Other",
+      "color": "#43A047",
+      "icon": "💸",
+      "is_active": true
+    },
+    {
+      "id": "other",
+      "category_id": "other",
+      "name": "Other",
+      "color": "#9E9E9E",
+      "icon": "❓",
+      "is_active": true
+    }
+  ]
+}
