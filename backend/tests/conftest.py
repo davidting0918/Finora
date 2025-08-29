@@ -144,6 +144,8 @@ def sample_user_data():
 
 @pytest.fixture(scope="function")
 def sample_transaction_data():
+    from datetime import datetime
+    
     return {
         "transaction1": {
             "type": "expense",
@@ -157,22 +159,243 @@ def sample_transaction_data():
             "tags": [
               "test tag"
             ]
-        }
+        },
+        "old_transaction": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast",
+        },
+        "new_transaction": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 2000,
+            "transaction_date": "2025-08-02",
+            "category_id": "shopping",
+            "subcategory_id": "clothing",
+            "description": "ZARA",
+        },
+        "transaction_list": [
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 250,
+                "transaction_date": "2025-01-15",
+                "category_id": "food_dining",
+                "subcategory_id": "breakfast",
+                "description": "Morning coffee",
+                "notes": "Starbucks",
+                "tags": ["coffee", "morning"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 1200,
+                "transaction_date": "2025-01-16",
+                "category_id": "food_dining",
+                "subcategory_id": "lunch",
+                "description": "Business lunch",
+                "notes": "Din Tai Fung",
+                "tags": ["business", "restaurant"]
+            },
+            {
+                "type": "income",
+                "currency": "TWD",
+                "amount": 50000,
+                "transaction_date": "2025-01-01",
+                "category_id": "income",
+                "subcategory_id": "income_other",
+                "description": "Monthly salary",
+                "notes": "Company A",
+                "tags": ["salary", "monthly"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 3500,
+                "transaction_date": "2025-01-12",
+                "category_id": "shopping",
+                "subcategory_id": "clothing",
+                "description": "Winter jacket",
+                "notes": "Uniqlo",
+                "tags": ["winter", "clothing"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 120,
+                "transaction_date": "2025-01-18",
+                "category_id": "transportation",
+                "subcategory_id": "bus",
+                "description": "Daily commute",
+                "notes": "MRT card top-up",
+                "tags": ["commute", "transport"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 800,
+                "transaction_date": "2025-01-20",
+                "category_id": "entertainment",
+                "subcategory_id": "movie",
+                "description": "Movie night",
+                "notes": "威秀影城",
+                "tags": ["movie", "entertainment"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 15000,
+                "transaction_date": "2025-01-05",
+                "category_id": "living",
+                "subcategory_id": "rent",
+                "description": "Monthly rent",
+                "notes": "Apartment rent",
+                "tags": ["rent", "monthly"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 2500,
+                "transaction_date": "2025-01-10",
+                "category_id": "education",
+                "subcategory_id": "software",
+                "description": "Online course",
+                "notes": "Udemy Python course",
+                "tags": ["learning", "programming"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 500,
+                "transaction_date": "2025-01-22",
+                "category_id": "health",
+                "subcategory_id": "medical",
+                "description": "Dental checkup",
+                "notes": "Annual cleaning",
+                "tags": ["health", "dental"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 10000,
+                "transaction_date": "2025-01-25",
+                "category_id": "investment",
+                "subcategory_id": "stock",
+                "description": "Stock purchase",
+                "notes": "TSMC shares",
+                "tags": ["investment", "stock"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 450,
+                "transaction_date": "2025-01-14",
+                "category_id": "food_dining",
+                "subcategory_id": "dinner",
+                "description": "Family dinner",
+                "notes": "Hot pot restaurant",
+                "tags": ["family", "dinner"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 25000,
+                "transaction_date": "2025-01-08",
+                "category_id": "shopping",
+                "subcategory_id": "electronics",
+                "description": "New laptop",
+                "notes": "MacBook Pro",
+                "tags": ["laptop", "work"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 350,
+                "transaction_date": "2025-01-19",
+                "category_id": "transportation",
+                "subcategory_id": "taxi",
+                "description": "Taxi to airport",
+                "notes": "Uber",
+                "tags": ["airport", "travel"]
+            },
+            {
+                "type": "income",
+                "currency": "TWD",
+                "amount": 5000,
+                "transaction_date": "2025-01-15",
+                "category_id": "income",
+                "subcategory_id": "income_other",
+                "description": "Freelance project",
+                "notes": "Web development",
+                "tags": ["freelance", "bonus"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 2200,
+                "transaction_date": "2025-01-09",
+                "category_id": "shopping",
+                "subcategory_id": "home_goods",
+                "description": "Kitchen appliances",
+                "notes": "IKEA",
+                "tags": ["home", "kitchen"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 1500,
+                "transaction_date": "2025-01-13",
+                "category_id": "health",
+                "subcategory_id": "insurance",
+                "description": "Health insurance",
+                "notes": "Monthly premium",
+                "tags": ["insurance", "health"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 300,
+                "transaction_date": "2025-01-23",
+                "category_id": "transportation",
+                "subcategory_id": "parking",
+                "description": "Parking fee",
+                "notes": "Taipei 101",
+                "tags": ["parking", "city"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 15000,
+                "transaction_date": "2025-01-27",
+                "category_id": "travel",
+                "subcategory_id": "flight",
+                "description": "Flight to Japan",
+                "notes": "EVA Air",
+                "tags": ["travel", "international"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 950,
+                "transaction_date": "2025-01-07",
+                "category_id": "entertainment",
+                "subcategory_id": "game",
+                "description": "Gaming subscription",
+                "notes": "PlayStation Plus",
+                "tags": ["gaming", "subscription"]
+            },
+            {
+                "type": "expense",
+                "currency": "TWD",
+                "amount": 1000,
+                "transaction_date": "2025-01-01",
+                "category_id": "food_dining",
+                "subcategory_id": "food_dining_other",
+                "description": "Other food and dining",
+                "notes": "Other food and dining",
+            }
+        ]
     }
-
-# Register cleanup function to run at Python exit
-def final_cleanup():
-    """Emergency cleanup function for Python exit"""
-    global _session_db_client
-    if _session_db_client:
-        try:
-            # Try to close the client synchronously
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(safe_close_client(_session_db_client))
-            loop.close()
-        except Exception:
-            pass  # Ignore errors during final cleanup
-        _session_db_client = None
-
-atexit.register(final_cleanup)

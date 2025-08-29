@@ -1,10 +1,9 @@
-from backend.core.model.transaction import Transaction, Category, SubCategory, CreateTransactionRequest, transaction_collection, UpdateTransactionRequest, category_collection, subcategory_collection
+from backend.core.model.transaction import Transaction, Category, SubCategory, CreateTransactionRequest, transaction_collection, UpdateTransactionRequest, category_collection, subcategory_collection, TransactionListQuery, TransactionListResponse
 from backend.core.database import MongoAsyncClient
 from datetime import datetime as dt, timezone as tz, timedelta as td
 from backend.core.model.user import User
 import secrets
 from fastapi import HTTPException
-import json
 
 
 class TransactionService:
@@ -89,3 +88,102 @@ class TransactionService:
             transaction.model_dump(mode='json')
         )
         return transaction
+
+    async def delete_transaction(self, transaction_id: str, current_user: User):
+        # check if transaction exists
+        transaction = await self.db.find_one(
+            transaction_collection,
+            {"id": transaction_id, "user_id": current_user.id}
+        )
+        if not transaction:
+            raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} not found")
+
+        # soft delete
+        await self.db.update_one(
+            transaction_collection,
+            {"id": transaction_id, "user_id": current_user.id},
+            {"is_deleted": True}
+        )
+
+    async def get_transaction_list(self, query: TransactionListQuery, current_user: User) -> TransactionListResponse:
+        """
+        Get paginated list of transactions with filtering and sorting
+        """
+        # Build MongoDB query filter
+        filter_conditions = {
+            "user_id": current_user.id,
+            "is_deleted": False
+        }
+
+        # Add date range filter
+        if query.start_date or query.end_date:
+            date_filter = {}
+            if query.start_date:
+                # Convert to timestamp for comparison
+                start_timestamp = int(query.start_date.timestamp())
+                date_filter["$gte"] = start_timestamp
+            if query.end_date:
+                # Add 24 hours to include the entire end date
+                end_date = query.end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                end_timestamp = int(end_date.timestamp())
+                date_filter["$lte"] = end_timestamp
+            
+            # Use created_at for timestamp comparison since transaction_date is datetime
+            filter_conditions["created_at"] = date_filter
+
+        # Add transaction type filter
+        if query.transaction_type:
+            filter_conditions["type"] = query.transaction_type.value
+
+        # Add category filter
+        if query.category_id:
+            filter_conditions["category_id"] = query.category_id.value
+
+        # Add subcategory filter  
+        if query.subcategory_id:
+            filter_conditions["subcategory_id"] = query.subcategory_id.value
+
+        # Get total count for pagination using the new database method
+        total = await self.db.count_documents(transaction_collection, filter_conditions)
+
+        # Calculate pagination
+        skip = (query.page - 1) * query.limit
+        total_pages = (total + query.limit - 1) // query.limit
+
+        # Build sort criteria
+        sort_direction = 1 if query.sort_order == "asc" else -1
+        sort_criteria = [(query.sort_by, sort_direction)]
+
+        # Execute query with pagination and sorting using the new database method
+        documents = await self.db.find_with_pagination(
+            collection=transaction_collection,
+            filter=filter_conditions,
+            sort_criteria=sort_criteria,
+            skip=skip,
+            limit=query.limit
+        )
+
+        # Convert documents to Transaction objects
+        transactions = []
+        for doc in documents:
+            try:
+                transaction = Transaction(**doc)
+                transactions.append(transaction)
+            except Exception as e:
+                # Log error but continue processing other transactions
+                print(f"Error parsing transaction {doc.get('id', 'unknown')}: {e}")
+                continue
+
+        # Build response
+        response = TransactionListResponse(
+            transactions=transactions,
+            total=total,
+            page=query.page,
+            limit=query.limit,
+            total_pages=total_pages,
+            has_next=query.page < total_pages,
+            has_prev=query.page > 1
+        )
+
+        return response
+        
