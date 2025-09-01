@@ -81,58 +81,83 @@ async def module_async_client():
         yield client
 
 @pytest_asyncio.fixture(scope="module")
-async def module_test_user(module_db_client):
+async def module_test_users(module_db_client):
     """
-    Module-scoped test user that persists across all tests in a module.
-    Creates a standard test user with known credentials.
+    Module-scoped test users (2 users) that persist across all tests in a module.
+    Creates 2 standard test users with known credentials and access tokens.
+    Uses service layer for fast and reliable user creation.
     """
-    # Clean database first
+    # Clean database first  
     await cleanup_test_db(module_db_client)
     await init_category()
     
     user_service = UserService()
     auth_service = AuthService()
     
-    # Standard test user data
-    user_data = {
-        "email": "module_test@example.com",
-        "name": "Module Test User",
-        "pwd": "ModuleTest123!"
+    # User 1 data
+    user1_data = {
+        "email": "user1@example.com",
+        "name": "Test User 1",
+        "pwd": "TestUser1Pass!"
     }
     
-    # Create user
-    created_user = await user_service.create_user(
-        email=user_data["email"],
-        name=user_data["name"],
-        pwd=user_data["pwd"]
-    )
+    # User 2 data
+    user2_data = {
+        "email": "user2@example.com", 
+        "name": "Test User 2",
+        "pwd": "TestUser2Pass!"
+    }
     
-    # Login to get tokens
-    login_result = await auth_service.login_user(
-        email=user_data["email"], 
-        pwd=user_data["pwd"]
+    # Create user 1 using service layer (not API)
+    from backend.core.model.user import CreateUserRequest
+    
+    user1_request = CreateUserRequest(
+        email=user1_data["email"],
+        name=user1_data["name"],
+        pwd=user1_data["pwd"]
     )
+    created_user1 = await user_service.create_user(user1_request)
+    
+    # Create user 2 using service layer  
+    user2_request = CreateUserRequest(
+        email=user2_data["email"],
+        name=user2_data["name"],
+        pwd=user2_data["pwd"]
+    )
+    created_user2 = await user_service.create_user(user2_request)
+    
+    # Get access tokens for both users using service layer
+    token1_result = await auth_service.get_or_create_token(created_user1.id)
+    token2_result = await auth_service.get_or_create_token(created_user2.id)
     
     return {
-        "user": created_user,
-        "user_data": user_data,
-        "auth_tokens": login_result,
-        "access_token": login_result.access_token
+        "user1": {
+            "user": created_user1,
+            "user_data": user1_data,
+            "access_token": token1_result["access_token"],
+            "headers": {"Authorization": f"Bearer {token1_result['access_token']}"}
+        },
+        "user2": {
+            "user": created_user2,
+            "user_data": user2_data, 
+            "access_token": token2_result["access_token"],
+            "headers": {"Authorization": f"Bearer {token2_result['access_token']}"}
+        }
     }
 
 @pytest.fixture(scope="module")
-def module_auth_headers(module_test_user):
-    """Module-scoped authorization headers for API requests"""
-    return {"Authorization": f"Bearer {module_test_user['access_token']}"}
+def module_auth_headers(module_test_users):
+    """Module-scoped authorization headers for API requests (user1 by default)"""
+    return module_test_users["user1"]["headers"]
 
 @pytest_asyncio.fixture(scope="module")
-async def module_test_transactions(module_test_user, module_db_client):
+async def module_test_transactions(module_test_users, module_db_client):
     """
     Module-scoped test transactions that persist across tests in a module.
     Creates comprehensive transaction data for testing analytics and other features.
     """
     transaction_service = TransactionService()
-    created_user = module_test_user["user"]
+    created_user = module_test_users["user1"]["user"]
     
     # Load transaction data from file if available, else use embedded data
     try:
@@ -291,16 +316,19 @@ async def module_test_transactions(module_test_user, module_db_client):
     }
 
 @pytest_asyncio.fixture(scope="module")
-async def comprehensive_test_data(module_test_user, module_test_transactions):
+async def comprehensive_test_data(module_test_users, module_test_transactions):
     """
-    Module-scoped comprehensive test data combining user, auth, and transactions.
+    Module-scoped comprehensive test data combining users, auth, and transactions.
     This is the main fixture that test modules should use.
     """
     return {
-        "user": module_test_user["user"],
-        "user_data": module_test_user["user_data"],
-        "auth_tokens": module_test_user["auth_tokens"],
-        "access_token": module_test_user["access_token"],
+        "user1": module_test_users["user1"]["user"],
+        "user2": module_test_users["user2"]["user"],
+        "user1_data": module_test_users["user1"]["user_data"],
+        "user2_data": module_test_users["user2"]["user_data"],
+        "user1_headers": module_test_users["user1"]["headers"],
+        "user2_headers": module_test_users["user2"]["headers"],
+        "access_token": module_test_users["user1"]["access_token"],  # Default to user1
         "transactions": module_test_transactions["transactions"],
         "transactions_data": module_test_transactions["raw_data"],
         "transactions_count": module_test_transactions["count"]
@@ -420,7 +448,7 @@ def load_test_data():
     return _load_data
 
 @pytest_asyncio.fixture(scope="module") 
-async def analytics_test_data(module_test_user, load_test_data):
+async def analytics_test_data(module_test_users, load_test_data):
     """
     Module-scoped analytics test data.
     Loads analytics-specific test data and creates transactions for analytics testing.
@@ -431,7 +459,7 @@ async def analytics_test_data(module_test_user, load_test_data):
     # If no specific analytics data, create comprehensive test transactions
     if not analytics_data.get("transactions"):
         analytics_data = {
-            "user": module_test_user["user_data"],
+            "user": module_test_users["user1"]["user_data"],
             "transactions": [
                 # Income transactions
                 {
@@ -576,14 +604,14 @@ async def analytics_test_data(module_test_user, load_test_data):
     for transaction_data in analytics_data["transactions"]:
         created_transaction = await transaction_service.create_transaction(
             transaction_data,
-            module_test_user["user"]
+            module_test_users["user1"]["user"]
         )
         created_transactions.append(created_transaction)
     
     return {
-        "user": module_test_user["user"],
-        "access_token": module_test_user["access_token"],
-        "auth_tokens": module_test_user["auth_tokens"],
+        "user": module_test_users["user1"]["user"],
+        "access_token": module_test_users["user1"]["access_token"],
+        "auth_tokens": module_test_users["user1"],
         "transactions": created_transactions,
         "raw_data": analytics_data["transactions"],
         "count": len(created_transactions)
