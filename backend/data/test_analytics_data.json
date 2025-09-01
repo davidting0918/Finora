@@ -1,0 +1,174 @@
+{
+  "user": {
+    "email": "analytics_test@example.com",
+    "name": "Analytics Test User",
+    "pwd": "AnalyticsTest123!"
+  },
+  "transactions": [
+    {
+      "type": "income",
+      "currency": "TWD",
+      "amount": 50000,
+      "transaction_date": "2024-12-01",
+      "category_id": "income",
+      "subcategory_id": "income_other",
+      "description": "Monthly salary",
+      "notes": "Company A",
+      "tags": ["salary", "monthly"]
+    },
+    {
+      "type": "income",
+      "currency": "TWD",
+      "amount": 5000,
+      "transaction_date": "2024-12-15",
+      "category_id": "income",
+      "subcategory_id": "income_other",
+      "description": "Freelance project",
+      "notes": "Web development",
+      "tags": ["freelance", "bonus"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 15000,
+      "transaction_date": "2024-12-02",
+      "category_id": "living",
+      "subcategory_id": "rent",
+      "description": "Monthly rent",
+      "notes": "Apartment rent",
+      "tags": ["rent", "monthly"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 1200,
+      "transaction_date": "2024-12-03",
+      "category_id": "food_dining",
+      "subcategory_id": "lunch",
+      "description": "Business lunch",
+      "notes": "Din Tai Fung",
+      "tags": ["business", "restaurant"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 250,
+      "transaction_date": "2024-12-04",
+      "category_id": "food_dining",
+      "subcategory_id": "breakfast",
+      "description": "Morning coffee",
+      "notes": "Starbucks",
+      "tags": ["coffee", "morning"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 800,
+      "transaction_date": "2024-12-05",
+      "category_id": "entertainment",
+      "subcategory_id": "movie",
+      "description": "Movie night",
+      "notes": "威秀影城",
+      "tags": ["movie", "entertainment"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 2500,
+      "transaction_date": "2024-12-06",
+      "category_id": "shopping",
+      "subcategory_id": "clothing",
+      "description": "Winter jacket",
+      "notes": "Uniqlo",
+      "tags": ["winter", "clothing"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 500,
+      "transaction_date": "2024-12-07",
+      "category_id": "transportation",
+      "subcategory_id": "taxi",
+      "description": "Taxi to airport",
+      "notes": "Uber",
+      "tags": ["airport", "travel"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 3500,
+      "transaction_date": "2024-12-08",
+      "category_id": "health",
+      "subcategory_id": "medical",
+      "description": "Medical checkup",
+      "notes": "Annual checkup",
+      "tags": ["health", "medical"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 10000,
+      "transaction_date": "2024-12-09",
+      "category_id": "investment",
+      "subcategory_id": "stock",
+      "description": "Stock purchase",
+      "notes": "TSMC shares",
+      "tags": ["investment", "stock"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 1500,
+      "transaction_date": "2024-12-10",
+      "category_id": "food_dining",
+      "subcategory_id": "dinner",
+      "description": "Family dinner",
+      "notes": "Hot pot restaurant",
+      "tags": ["family", "dinner"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 4500,
+      "transaction_date": "2024-12-11",
+      "category_id": "education",
+      "subcategory_id": "course",
+      "description": "Programming course",
+      "notes": "Udemy Python course",
+      "tags": ["learning", "programming"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 300,
+      "transaction_date": "2024-12-12",
+      "category_id": "transportation",
+      "subcategory_id": "parking",
+      "description": "Parking fee",
+      "notes": "Taipei 101",
+      "tags": ["parking", "city"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 12000,
+      "transaction_date": "2024-12-13",
+      "category_id": "travel",
+      "subcategory_id": "flight",
+      "description": "Flight to Japan",
+      "notes": "EVA Air",
+      "tags": ["travel", "international"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 950,
+      "transaction_date": "2024-12-14",
+      "category_id": "entertainment",
+      "subcategory_id": "game",
+      "description": "Gaming subscription",
+      "notes": "PlayStation Plus",
+      "tags": ["gaming", "subscription"]
+    }
+  ]
+}

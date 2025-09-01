@@ -1,209 +1,12 @@
 """
-Analytics endpoints tests with proper fixture scope management.
-This module demonstrates correct usage of module-scoped fixtures that work with conftest.py.
+Analytics endpoints tests using shared module-scoped fixtures from conftest.py.
+This demonstrates the simplified approach using centralized test fixtures.
 """
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from datetime import datetime as dt
-from backend.main import app
-from backend.user.service import UserService
-from backend.auth.service import AuthService
-from backend.transaction.service import TransactionService
-from backend.core.initializer import init_category
-from backend.core.database import MongoAsyncClient
-from backend.core.model.user import User
-
-# Module-scoped fixtures for analytics tests
-@pytest_asyncio.fixture(scope="module")
-async def analytics_db_client():
-    """Module-scoped database client for analytics tests"""
-    client = MongoAsyncClient(test_mode=True)
-    try:
-        yield client
-    finally:
-        if client:
-            await client.close()
-
-@pytest_asyncio.fixture(scope="module")
-async def analytics_test_data(analytics_db_client):
-    """
-    Module-scoped fixture that sets up analytics test data once and preserves it 
-    across all test functions in this module.
-    Uses module-scoped database client to avoid scope conflicts.
-    """
-    # Clean database and initialize categories
-    from backend.tests.conftest import cleanup_test_db
-    await cleanup_test_db(analytics_db_client)
-    await init_category()
-    
-    # Create user
-    user_service = UserService()
-    auth_service = AuthService()
-    transaction_service = TransactionService()
-    
-    # User data
-    user_data = {
-        "email": "analytics_test@example.com",
-        "name": "Analytics Test User",
-        "pwd": "AnalyticsTest123!"
-    }
-    
-    created_user = await user_service.create_user(
-        email=user_data["email"],
-        name=user_data["name"],
-        pwd=user_data["pwd"]
-    )
-    
-    # Login user to get tokens
-    login_result = await auth_service.login_user(
-        email=user_data["email"], 
-        pwd=user_data["pwd"]
-    )
-    
-    # Sample transaction data for analytics testing
-    transactions_data = [
-        {
-            "type": "income",
-            "currency": "TWD",
-            "amount": 50000,
-            "transaction_date": "2024-12-01",
-            "category_id": "income",
-            "subcategory_id": "income_other",
-            "description": "Monthly salary",
-            "notes": "Company salary",
-            "tags": ["salary", "monthly"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 15000,
-            "transaction_date": "2024-12-02",
-            "category_id": "living",
-            "subcategory_id": "rent",
-            "description": "Monthly rent",
-            "notes": "Apartment rent",
-            "tags": ["rent", "monthly"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 1200,
-            "transaction_date": "2024-12-03",
-            "category_id": "food_dining",
-            "subcategory_id": "lunch",
-            "description": "Business lunch",
-            "notes": "Restaurant meal",
-            "tags": ["business", "food"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 500,
-            "transaction_date": "2024-12-04",
-            "category_id": "transportation",
-            "subcategory_id": "taxi",
-            "description": "Taxi ride",
-            "notes": "Uber",
-            "tags": ["transport", "taxi"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 800,
-            "transaction_date": "2024-12-05",
-            "category_id": "entertainment",
-            "subcategory_id": "movie",
-            "description": "Movie night",
-            "notes": "Cinema",
-            "tags": ["entertainment", "movie"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 2500,
-            "transaction_date": "2024-12-06",
-            "category_id": "shopping",
-            "subcategory_id": "clothing",
-            "description": "Winter jacket",
-            "notes": "Clothing store",
-            "tags": ["winter", "clothing"]
-        },
-        {
-            "type": "income",
-            "currency": "TWD",
-            "amount": 5000,
-            "transaction_date": "2024-12-07",
-            "category_id": "income",
-            "subcategory_id": "income_other",
-            "description": "Freelance project",
-            "notes": "Side project",
-            "tags": ["freelance", "bonus"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 3500,
-            "transaction_date": "2024-12-08",
-            "category_id": "health",
-            "subcategory_id": "medical",
-            "description": "Medical checkup",
-            "notes": "Annual checkup",
-            "tags": ["health", "medical"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 10000,
-            "transaction_date": "2024-12-09",
-            "category_id": "investment",
-            "subcategory_id": "stock",
-            "description": "Stock investment",
-            "notes": "Portfolio investment",
-            "tags": ["investment", "stock"]
-        },
-        {
-            "type": "expense",
-            "currency": "TWD",
-            "amount": 250,
-            "transaction_date": "2024-12-10",
-            "category_id": "food_dining",
-            "subcategory_id": "breakfast",
-            "description": "Morning coffee",
-            "notes": "Coffee shop",
-            "tags": ["coffee", "morning"]
-        }
-    ]
-    
-    # Create transactions
-    created_transactions = []
-    for transaction_data in transactions_data:
-        created_transaction = await transaction_service.create_transaction(
-            transaction_data,
-            created_user
-        )
-        created_transactions.append(created_transaction)
-    
-    # Return test context
-    return {
-        "user": created_user,
-        "auth_tokens": login_result,
-        "transactions": created_transactions,
-        "access_token": login_result.access_token,
-        "transactions_data": transactions_data
-    }
-
-@pytest.fixture(scope="module") 
-def auth_headers(analytics_test_data):
-    """Get authorization headers for analytics tests"""
-    return {"Authorization": f"Bearer {analytics_test_data['access_token']}"}
-
-@pytest_asyncio.fixture(scope="module")
-async def async_client_for_analytics():
-    """Module-scoped async client for analytics tests"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        yield client
 
 class TestAnalyticsOverview:
     """Test the /analytics/overview endpoint with various scenarios"""
@@ -211,14 +14,14 @@ class TestAnalyticsOverview:
     @pytest.mark.asyncio
     async def test_get_analytics_overview_success(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict,
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict,
         analytics_test_data: dict
     ):
         """Test successful analytics overview retrieval"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/overview",
-            headers=auth_headers
+            headers=comprehensive_auth_headers
         )
         
         assert response.status_code == 200
@@ -249,8 +52,8 @@ class TestAnalyticsOverview:
     @pytest.mark.asyncio
     async def test_analytics_overview_with_date_range(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test analytics overview with date range filtering"""
         params = {
@@ -259,9 +62,9 @@ class TestAnalyticsOverview:
             "period": "daily"
         }
         
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/overview",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params=params
         )
         
@@ -277,14 +80,14 @@ class TestAnalyticsOverview:
     @pytest.mark.asyncio  
     async def test_analytics_overview_by_transaction_type(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test analytics overview filtered by transaction type"""
         # Test expense only
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/overview",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"transaction_type": "expense"}
         )
         
@@ -299,10 +102,10 @@ class TestAnalyticsOverview:
     @pytest.mark.asyncio
     async def test_analytics_overview_unauthorized(
         self, 
-        async_client_for_analytics: AsyncClient
+        module_async_client: AsyncClient
     ):
         """Test analytics overview without authorization"""
-        response = await async_client_for_analytics.get("/analytics/overview")
+        response = await module_async_client.get("/analytics/overview")
         assert response.status_code == 401
 
 class TestCategoryBreakdown:
@@ -311,13 +114,13 @@ class TestCategoryBreakdown:
     @pytest.mark.asyncio
     async def test_category_breakdown_success(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test successful category breakdown retrieval"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/category-breakdown",
-            headers=auth_headers
+            headers=comprehensive_auth_headers
         )
         
         assert response.status_code == 200
@@ -350,13 +153,13 @@ class TestCategoryBreakdown:
     @pytest.mark.asyncio
     async def test_category_breakdown_by_expense_type(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test category breakdown filtered by expense type"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/category-breakdown",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"transaction_type": "expense"}
         )
         
@@ -377,13 +180,13 @@ class TestSpendingTrends:
     @pytest.mark.asyncio
     async def test_spending_trends_daily(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test daily spending trends"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/spending-trends",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"period": "daily"}
         )
         
@@ -407,13 +210,13 @@ class TestSpendingTrends:
     @pytest.mark.asyncio
     async def test_spending_trends_monthly(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test monthly spending trends"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/spending-trends",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"period": "monthly"}
         )
         
@@ -431,13 +234,13 @@ class TestSpendingTrends:
     @pytest.mark.asyncio
     async def test_spending_trends_with_category_filter(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test spending trends filtered by category"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/spending-trends",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"category_id": "food_dining", "period": "daily"}
         )
         
@@ -458,13 +261,13 @@ class TestFinancialSummary:
     @pytest.mark.asyncio
     async def test_financial_summary_success(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test successful financial summary retrieval"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/financial-summary",
-            headers=auth_headers
+            headers=comprehensive_auth_headers
         )
         
         assert response.status_code == 200
@@ -494,13 +297,13 @@ class TestFinancialSummary:
     @pytest.mark.asyncio
     async def test_financial_summary_with_date_range(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test financial summary with date filtering"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/financial-summary",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={
                 "start_date": "2024-12-01T00:00:00",
                 "end_date": "2024-12-10T23:59:59"
@@ -521,13 +324,13 @@ class TestTagAnalytics:
     @pytest.mark.asyncio
     async def test_tag_analytics_success(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test successful tag analytics retrieval"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/tag-analytics",
-            headers=auth_headers
+            headers=comprehensive_auth_headers
         )
         
         assert response.status_code == 200
@@ -552,13 +355,13 @@ class TestTagAnalytics:
     @pytest.mark.asyncio
     async def test_tag_analytics_with_date_range(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test tag analytics with date filtering"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/tag-analytics",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={
                 "start_date": "2024-12-01T00:00:00",
                 "end_date": "2024-12-31T23:59:59"
@@ -586,13 +389,13 @@ class TestAnalyticsValidation:
     @pytest.mark.asyncio
     async def test_invalid_date_format(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test analytics with invalid date format"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/overview",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"start_date": "invalid-date"}
         )
         
@@ -602,13 +405,13 @@ class TestAnalyticsValidation:
     @pytest.mark.asyncio
     async def test_invalid_period_value(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test analytics with invalid period value"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/spending-trends",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={"period": "invalid_period"}
         )
         
@@ -618,13 +421,13 @@ class TestAnalyticsValidation:
     @pytest.mark.asyncio
     async def test_future_date_range(
         self, 
-        async_client_for_analytics: AsyncClient, 
-        auth_headers: dict
+        module_async_client: AsyncClient, 
+        comprehensive_auth_headers: dict
     ):
         """Test analytics with future date range (should return empty results)"""
-        response = await async_client_for_analytics.get(
+        response = await module_async_client.get(
             "/analytics/overview",
-            headers=auth_headers,
+            headers=comprehensive_auth_headers,
             params={
                 "start_date": "2025-01-01T00:00:00",
                 "end_date": "2025-12-31T23:59:59"

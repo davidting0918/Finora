@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "email": "test@example.com",
+      "name": "Test User",
+      "pwd": "TestPass123!"
+    },
+    {
+      "email": "user2@example.com",
+      "name": "Test User 2",
+      "pwd": "TestPass456@"
+    }
+  ]
+}
