@@ -4,11 +4,11 @@ from fastapi import status
 import pytest_asyncio
 
 @pytest_asyncio.fixture
-async def user_and_token(async_client: AsyncClient, sample_user_data, init_category_for_test):
+async def user_and_token(async_client: AsyncClient, test_user_data, init_category_for_test):
 
     response = await async_client.post(
         "/user/create",
-        json=sample_user_data["user1"]
+        json=test_user_data["user1"]
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -18,8 +18,8 @@ async def user_and_token(async_client: AsyncClient, sample_user_data, init_categ
     response = await async_client.post(
         "/auth/email/login",
         json={
-            "email": sample_user_data["user1"]["email"],
-            "pwd": sample_user_data["user1"]["pwd"]
+            "email": test_user_data["user1"]["email"],
+            "pwd": test_user_data["user1"]["pwd"]
         }
     )
     assert response.status_code == status.HTTP_200_OK
@@ -29,17 +29,17 @@ async def user_and_token(async_client: AsyncClient, sample_user_data, init_categ
     headers = {
         "Authorization": f"Bearer {data['access_token']}"
     }
-    return headers, sample_user_data["user1"]
+    return headers, test_user_data["user1"]
 
 class TestTransaction:
     @pytest.mark.asyncio
     async def test_create_transaction(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         response = await async_client.post(
             "/transaction/create",
-            json=sample_transaction_data["transaction1"],
+            json=test_transactions_data["transaction1"],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
@@ -49,13 +49,13 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
 
         response = await async_client.post(
             "/transaction/create",
-            json=sample_transaction_data["transaction1"],
+            json=test_transactions_data["transaction1"],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
@@ -101,13 +101,13 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_update_transaction(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
 
         response = await async_client.post(
             "/transaction/create",
-            json=sample_transaction_data["old_transaction"],
+            json=test_transactions_data["old_transaction"],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
@@ -117,7 +117,7 @@ class TestTransaction:
 
         response = await async_client.post(
             "/transaction/update/{}".format(data["data"]["id"]),
-            json=sample_transaction_data["new_transaction"],
+            json=test_transactions_data["new_transaction"],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
@@ -127,13 +127,13 @@ class TestTransaction:
         
     @pytest.mark.asyncio
     async def test_delete_transaction(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
 
         response = await async_client.post(
             "/transaction/create",
-            json=sample_transaction_data["transaction1"],
+            json=test_transactions_data["transaction1"],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
@@ -151,13 +151,13 @@ class TestTransaction:
         assert data["message"] == "Transaction deleted successfully"
     @pytest.mark.asyncio
     async def test_get_transaction_list_basic(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create multiple diverse transactions using sample data
         transaction_ids = []
-        for transaction in sample_transaction_data["transaction_list"][:10]:  # Use first 10 transactions
+        for transaction in test_transactions_data["transaction_list"][:10]:  # Use first 10 transactions
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -184,12 +184,12 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_pagination(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create all 20 transactions for comprehensive pagination testing
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -238,12 +238,12 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_filtering_by_type(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create all sample transactions (includes both income and expense)
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -275,12 +275,12 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_filtering_by_category(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create all sample transactions
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -323,12 +323,12 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_sorting(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create all sample transactions with diverse amounts
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -374,12 +374,12 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_search(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         headers, _ = user_and_token
         
         # Create all sample transactions for comprehensive search testing
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -433,13 +433,13 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_date_range_filtering(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         """Test date range filtering with realistic transaction dates"""
         headers, _ = user_and_token
         
         # Create all sample transactions
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -469,7 +469,7 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_amount_statistics(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         """Test transaction list with focus on amount statistics using realistic data"""
         headers, _ = user_and_token
@@ -477,7 +477,7 @@ class TestTransaction:
         # Create all sample transactions
         total_expense = 0
         total_income = 0
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
@@ -513,13 +513,13 @@ class TestTransaction:
 
     @pytest.mark.asyncio
     async def test_get_transaction_list_subcategory_filtering(
-        self, async_client: AsyncClient, sample_transaction_data, db_client, user_and_token
+        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
     ):
         """Test filtering by subcategories using diverse sample data"""
         headers, _ = user_and_token
         
         # Create all sample transactions
-        for transaction in sample_transaction_data["transaction_list"]:
+        for transaction in test_transactions_data["transaction_list"]:
             response = await async_client.post(
                 "/transaction/create",
                 json=transaction,
