@@ -61,19 +61,6 @@ async def shared_analytics_data():
         pwd=user_data["pwd"]
     )
     
-    # Create transactions
-    transaction_service = TransactionService()
-    created_transactions = []
-    
-    for transaction_data in test_data["transactions"]:
-        # Convert string date to datetime
-        if isinstance(transaction_data["transaction_date"], str):
-            transaction_data["transaction_date"] = dt.fromisoformat(transaction_data["transaction_date"])
-        
-        created_transaction = await transaction_service.create_transaction(
-            transaction_data, created_user
-        )
-        created_transactions.append(created_transaction)
     
     # Return test context
     return {

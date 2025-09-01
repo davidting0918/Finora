@@ -5,7 +5,6 @@ from backend.core.model.transaction import TransactionType, CategoryId, Currency
 from enum import Enum
 
 class AnalyticsPeriod(Enum):
-    daily = "daily"
     weekly = "weekly"
     monthly = "monthly"
     yearly = "yearly"

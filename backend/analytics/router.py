@@ -73,7 +73,7 @@ async def get_spending_trends_route(
     current_user: Annotated[User, Depends(get_current_active_user)],
     start_date: Optional[dt] = Query(None, description="Start date filter (ISO format)"),
     end_date: Optional[dt] = Query(None, description="End date filter (ISO format)"),
-    period: AnalyticsPeriod = Query(AnalyticsPeriod.daily, description="Analysis period granularity"),
+    period: AnalyticsPeriod = Query(AnalyticsPeriod.weekly, description="Analysis period granularity"),
     category_id: Optional[CategoryId] = Query(None, description="Filter by category ID")
 ):
     """

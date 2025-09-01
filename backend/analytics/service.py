@@ -305,9 +305,7 @@ class AnalyticsService:
         """
         Generate period key based on date and period type
         """
-        if period == AnalyticsPeriod.daily:
-            return date.strftime('%Y-%m-%d')
-        elif period == AnalyticsPeriod.weekly:
+        if period == AnalyticsPeriod.weekly:
             year, week, _ = date.isocalendar()
             return f"{year}-W{week:02d}"
         elif period == AnalyticsPeriod.monthly:
@@ -315,7 +313,7 @@ class AnalyticsService:
         elif period == AnalyticsPeriod.yearly:
             return date.strftime('%Y')
         else:
-            return date.strftime('%Y-%m-%d')
+            raise ValueError(f"Invalid period: {period}")
 
     def _empty_analytics_overview(self) -> AnalyticsOverview:
         """
