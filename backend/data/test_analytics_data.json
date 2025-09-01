@@ -1,0 +1,141 @@
+{
+  "user": {
+    "email": "analytics@test.com",
+    "name": "Analytics Test User", 
+    "pwd": "TestPass123!"
+  },
+  "transactions": [
+    {
+      "type": "income",
+      "currency": "TWD",
+      "amount": 50000,
+      "transaction_date": "2024-12-01",
+      "category_id": "income",
+      "subcategory_id": "income_other",
+      "description": "Monthly salary",
+      "notes": "December salary",
+      "tags": ["salary", "monthly"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD", 
+      "amount": 15000,
+      "transaction_date": "2024-12-02",
+      "category_id": "living",
+      "subcategory_id": "rent",
+      "description": "Monthly rent",
+      "notes": "Apartment rent",
+      "tags": ["rent", "monthly"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 1200,
+      "transaction_date": "2024-12-03",
+      "category_id": "food_dining",
+      "subcategory_id": "lunch",
+      "description": "Business lunch",
+      "notes": "Restaurant",
+      "tags": ["business", "lunch"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 250,
+      "transaction_date": "2024-12-04",
+      "category_id": "food_dining",
+      "subcategory_id": "breakfast",
+      "description": "Morning coffee",
+      "notes": "Starbucks",
+      "tags": ["coffee", "morning"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 3500,
+      "transaction_date": "2024-12-05",
+      "category_id": "shopping",
+      "subcategory_id": "clothing",
+      "description": "Winter clothes",
+      "notes": "Uniqlo",
+      "tags": ["clothing", "winter"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 800,
+      "transaction_date": "2024-12-06",
+      "category_id": "entertainment",
+      "subcategory_id": "movie",
+      "description": "Movie tickets",
+      "notes": "Cinema",
+      "tags": ["entertainment", "movie"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 10000,
+      "transaction_date": "2024-12-07",
+      "category_id": "investment",
+      "subcategory_id": "stock",
+      "description": "Stock investment",
+      "notes": "TSMC shares",
+      "tags": ["investment", "stock"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 350,
+      "transaction_date": "2024-12-08",
+      "category_id": "transportation",
+      "subcategory_id": "taxi",
+      "description": "Taxi fare",
+      "notes": "Uber",
+      "tags": ["transportation", "taxi"]
+    },
+    {
+      "type": "income",
+      "currency": "TWD",
+      "amount": 5000,
+      "transaction_date": "2024-12-09",
+      "category_id": "income",
+      "subcategory_id": "income_other",
+      "description": "Freelance bonus",
+      "notes": "Side project",
+      "tags": ["freelance", "bonus"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 500,
+      "transaction_date": "2024-12-10",
+      "category_id": "health",
+      "subcategory_id": "medical",
+      "description": "Medical checkup",
+      "notes": "Clinic visit",
+      "tags": ["health", "medical"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 2000,
+      "transaction_date": "2024-12-15",
+      "category_id": "food_dining", 
+      "subcategory_id": "dinner",
+      "description": "Family dinner",
+      "notes": "Hot pot",
+      "tags": ["family", "dinner"]
+    },
+    {
+      "type": "expense",
+      "currency": "TWD",
+      "amount": 1500,
+      "transaction_date": "2024-12-20",
+      "category_id": "shopping",
+      "subcategory_id": "electronics",
+      "description": "Phone accessories",
+      "notes": "Apple Store",
+      "tags": ["electronics", "accessories"]
+    }
+  ]
+}
