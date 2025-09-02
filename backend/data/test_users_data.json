@@ -8,5 +8,10 @@
         "email": "test2@example.com", 
         "name": "test2",
         "pwd": "TestPass2@"
+    },
+    "weak_pwd_user": {
+        "email": "weak_pwd_user@example.com",
+        "name": "weak_pwd_user",
+        "pwd": "weak_pwd"
     }
 }

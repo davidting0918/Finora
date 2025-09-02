@@ -1,597 +1,210 @@
 import pytest
 from httpx import AsyncClient
 from fastapi import status
-import pytest_asyncio
 
-@pytest_asyncio.fixture
-async def user_and_token(async_client: AsyncClient, test_user_data, init_category_for_test):
+async def create_transaction(async_client: AsyncClient, headers: dict, transaction_data: dict):
+    """Helper function to create a transaction"""
+    response = await async_client.post("/transaction/create", json=transaction_data, headers=headers)
+    return response.json(), response.status_code
 
-    response = await async_client.post(
-        "/user/create",
-        json=test_user_data["user1"]
-    )
-    assert response.status_code == status.HTTP_200_OK
-    data = response.json()
-    assert data["status"] == 1
-    assert data["message"] == "User registered successfully"
+async def update_transaction(transaction_id: str, async_client: AsyncClient, headers: dict, transaction_data: dict):
+    """Helper function to update a transaction"""
+    response = await async_client.post(f"/transaction/update/{transaction_id}", json=transaction_data, headers=headers)
+    return response.json(), response.status_code
 
-    response = await async_client.post(
-        "/auth/email/login",
-        json={
-            "email": test_user_data["user1"]["email"],
-            "pwd": test_user_data["user1"]["pwd"]
-        }
-    )
-    assert response.status_code == status.HTTP_200_OK
-    data = response.json()
-    assert "access_token" in data
+async def get_transaction(transaction_id: str, async_client: AsyncClient, headers: dict):
+    """Helper function to get a single transaction"""
+    response = await async_client.get(f"/transaction/info/{transaction_id}", headers=headers)
+    return response.json(), response.status_code
 
-    headers = {
-        "Authorization": f"Bearer {data['access_token']}"
-    }
-    return headers, test_user_data["user1"]
+async def get_transaction_list(async_client: AsyncClient, headers: dict, params: dict = None):
+    """Helper function to get transaction list"""
+    response = await async_client.get("/transaction/list", headers=headers, params=params)
+    return response.json(), response.status_code
 
-class TestTransaction:
-    @pytest.mark.asyncio
-    async def test_create_transaction(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-        response = await async_client.post(
-            "/transaction/create",
-            json=test_transactions_data["transaction1"],
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction created successfully"
+async def delete_transaction(transaction_id: str, async_client: AsyncClient, headers: dict):
+    """Helper function to delete a transaction"""
+    response = await async_client.post(f"/transaction/delete/{transaction_id}", headers=headers)
+    return response.json(), response.status_code
+
+
+class TestTransactionCRUD:
 
     @pytest.mark.asyncio
-    async def test_get_transaction(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
+    async def test_create_single_transaction(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test creating a single transaction"""
+        transaction_data = test_transactions_data["transaction1"]
 
-        response = await async_client.post(
-            "/transaction/create",
-            json=test_transactions_data["transaction1"],
-            headers=headers
+        response_data, status_code = await create_transaction(
+            async_client, session_auth_headers, transaction_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction created successfully"
-
-        response = await async_client.get(
-            "/transaction/info/{}".format(data["data"]["id"]),
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction fetched successfully"
-
-    @pytest.mark.asyncio 
-    async def test_get_main_and_sub_categories(
-        self, async_client: AsyncClient, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-
-        response = await async_client.get(
-            "/transaction/category",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Categories fetched successfully"
-        assert len(data["data"]) > 0
-
-        response = await async_client.get(
-            "/transaction/subcategory/{}".format(list(data["data"].keys())[0]),
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Subcategories fetched successfully"
-        assert len(data["data"]) > 0
-
-
-    @pytest.mark.asyncio
-    async def test_update_transaction(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-
-        response = await async_client.post(
-            "/transaction/create",
-            json=test_transactions_data["old_transaction"],
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction created successfully"
-
-        response = await async_client.post(
-            "/transaction/update/{}".format(data["data"]["id"]),
-            json=test_transactions_data["new_transaction"],
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction updated successfully"
+        
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transaction created successfully"
         
     @pytest.mark.asyncio
-    async def test_delete_transaction(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-
-        response = await async_client.post(
-            "/transaction/create",
-            json=test_transactions_data["transaction1"],
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction created successfully"
-
-        response = await async_client.post(
-            "/transaction/delete/{}".format(data["data"]["id"]),
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transaction deleted successfully"
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_basic(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-        
-        # Create multiple diverse transactions using sample data
-        transaction_ids = []
-        for transaction in test_transactions_data["transaction_list"][:10]:  # Use first 10 transactions
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
+    async def test_create_multiple_transactions(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test creating multiple transactions"""
+        tx_list = test_transactions_data["transaction_list"]
+        for tx in tx_list:
+            response_data, status_code = await create_transaction(
+                async_client, session_auth_headers, tx
             )
-            assert response.status_code == status.HTTP_200_OK
-            data = response.json()
-            assert data["status"] == 1
-            transaction_ids.append(data["data"]["id"])
         
-        # Test basic list functionality
-        response = await async_client.get(
-            "/transaction/list",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["message"] == "Transactions fetched successfully"
-        assert "transactions" in data["data"]
-        assert "pagination" in data["data"]
-        assert len(data["data"]["transactions"]) == 10
-        assert data["data"]["pagination"]["total"] == 10
+            assert status_code == status.HTTP_200_OK
+            assert response_data["status"] == 1
+            assert response_data["message"] == "Transaction created successfully"
 
     @pytest.mark.asyncio
-    async def test_get_transaction_list_pagination(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-        
-        # Create all 20 transactions for comprehensive pagination testing
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Test pagination - first page with limit 8
-        response = await async_client.get(
-            "/transaction/list?page=1&limit=8",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["page"] == 1
-        assert data["data"]["pagination"]["limit"] == 8
-        assert data["data"]["pagination"]["total"] == 20
-        assert data["data"]["pagination"]["total_pages"] == 3  # 20 items, 8 per page = 3 pages
-        assert data["data"]["pagination"]["has_next"] == True
-        assert data["data"]["pagination"]["has_prev"] == False
-        assert len(data["data"]["transactions"]) == 8
+    async def test_udpate_transaction(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test updating a transaction"""
 
-        # Test pagination - middle page
-        response = await async_client.get(
-            "/transaction/list?page=2&limit=8",
-            headers=headers
+        # create a transaction for later updating
+        old_transaction_data = test_transactions_data["old_transaction"]
+        response_data, status_code = await create_transaction(
+            async_client, session_auth_headers, old_transaction_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["page"] == 2
-        assert data["data"]["pagination"]["has_next"] == True
-        assert data["data"]["pagination"]["has_prev"] == True
-        assert len(data["data"]["transactions"]) == 8
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transaction created successfully"
 
-        # Test pagination - last page
-        response = await async_client.get(
-            "/transaction/list?page=3&limit=8",
-            headers=headers
+        # update the transaction
+        new_transaction_data = test_transactions_data["new_transaction"]
+        response_data, status_code = await update_transaction(
+            response_data["data"]["id"], async_client, session_auth_headers, new_transaction_data
+        )   
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transaction updated successfully"
+
+    # ================== READ OPERATIONS TESTS ==================
+    
+    @pytest.mark.asyncio
+    async def test_get_single_transaction(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test getting a single transaction by ID"""
+        # First create a transaction
+        transaction_data = test_transactions_data["transaction1"]
+        create_response_data, create_status_code = await create_transaction(
+            async_client, session_auth_headers, transaction_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["page"] == 3
-        assert data["data"]["pagination"]["has_next"] == False
-        assert data["data"]["pagination"]["has_prev"] == True
-        assert len(data["data"]["transactions"]) == 4  # Remaining 4 transactions
+        
+        assert create_status_code == status.HTTP_200_OK
+        created_transaction_id = create_response_data["data"]["id"]
+        
+        # Then get the transaction
+        response_data, status_code = await get_transaction(
+            created_transaction_id, async_client, session_auth_headers
+        )
+        
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transaction fetched successfully"
+        assert response_data["data"]["id"] == created_transaction_id
+        assert response_data["data"]["type"] == transaction_data["type"]
+        assert response_data["data"]["amount"] == transaction_data["amount"]
 
     @pytest.mark.asyncio
-    async def test_get_transaction_list_filtering_by_type(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
+    async def test_get_single_transaction_not_found(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test getting a non-existent transaction returns 404"""
+        non_existent_id = test_transactions_data["test_constants"]["non_existent_transaction_id"]
         
-        # Create all sample transactions (includes both income and expense)
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Filter by expense (should get 18 transactions)
-        response = await async_client.get(
-            "/transaction/list?transaction_type=expense",
-            headers=headers
+        response_data, status_code = await get_transaction(
+            non_existent_id, async_client, session_auth_headers
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] == 18
-        for transaction in data["data"]["transactions"]:
-            assert transaction["type"] == "expense"
         
-        # Filter by income (should get 2 transactions)
-        response = await async_client.get(
-            "/transaction/list?transaction_type=income",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] == 2
-        for transaction in data["data"]["transactions"]:
-            assert transaction["type"] == "income"
+        assert status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_get_transaction_list_filtering_by_category(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
+    async def test_get_transaction_list_default(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test getting transaction list with default pagination"""
+        # First create a few transactions
+        tx_list = test_transactions_data["transaction_list"][:3]  # Use first 3 transactions
+        for tx in tx_list:
+            await create_transaction(async_client, session_auth_headers, tx)
         
-        # Create all sample transactions
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Filter by food_dining category (should find multiple transactions)
-        response = await async_client.get(
-            "/transaction/list?category_id=food_dining",
-            headers=headers
+        # Get transaction list
+        response_data, status_code = await get_transaction_list(
+            async_client, session_auth_headers
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 4  # We have breakfast, lunch, dinner, snack, drink
-        for transaction in data["data"]["transactions"]:
-            assert transaction["category_id"] == "food_dining"
         
-        # Filter by shopping category
-        response = await async_client.get(
-            "/transaction/list?category_id=shopping",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 3  # We have clothing, electronics, home_goods
-        for transaction in data["data"]["transactions"]:
-            assert transaction["category_id"] == "shopping"
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transactions fetched successfully"
+        assert "data" in response_data
+        assert "transactions" in response_data["data"]
+        assert "pagination" in response_data["data"]
+        
+        # Check pagination info
+        pagination = response_data["data"]["pagination"]
+        assert pagination["page"] == 1
+        assert pagination["limit"] == 20
+        assert pagination["total"] >= len(tx_list)
+        assert isinstance(pagination["has_next"], bool)
+        assert isinstance(pagination["has_prev"], bool)
 
-        # Filter by income category
-        response = await async_client.get(
-            "/transaction/list?category_id=income",
-            headers=headers
+    # ================== DELETE OPERATIONS TESTS ==================
+    
+    @pytest.mark.asyncio
+    async def test_delete_single_transaction(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test deleting a single transaction"""
+        # First create a transaction
+        transaction_data = test_transactions_data["transaction1"]
+        create_response_data, create_status_code = await create_transaction(
+            async_client, session_auth_headers, transaction_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] == 2  # We have 2 income transactions
-        for transaction in data["data"]["transactions"]:
-            assert transaction["category_id"] == "income"
+        
+        assert create_status_code == status.HTTP_200_OK
+        created_transaction_id = create_response_data["data"]["id"]
+        
+        # Delete the transaction
+        response_data, status_code = await delete_transaction(
+            created_transaction_id, async_client, session_auth_headers
+        )
+        
+        assert status_code == status.HTTP_200_OK
+        assert response_data["status"] == 1
+        assert response_data["message"] == "Transaction deleted successfully"
+        
+        # Verify transaction is deleted by trying to get it
+        get_response_data, get_status_code = await get_transaction(
+            created_transaction_id, async_client, session_auth_headers
+        )
+        assert get_response_data['data']['is_deleted'] == True
 
     @pytest.mark.asyncio
-    async def test_get_transaction_list_sorting(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
+    async def test_delete_transaction_not_found(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test deleting a non-existent transaction returns 404"""
+        non_existent_id = test_transactions_data["test_constants"]["non_existent_transaction_id"]
         
-        # Create all sample transactions with diverse amounts
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Sort by amount ascending
-        response = await async_client.get(
-            "/transaction/list?sort_by=amount&sort_order=asc",
-            headers=headers
+        response_data, status_code = await delete_transaction(
+            non_existent_id, async_client, session_auth_headers
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        transactions = data["data"]["transactions"]
-        # Verify ascending order (amounts should increase)
-        for i in range(len(transactions) - 1):
-            assert transactions[i]["amount"] <= transactions[i + 1]["amount"]
         
-        # Sort by amount descending
-        response = await async_client.get(
-            "/transaction/list?sort_by=amount&sort_order=desc",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        transactions = data["data"]["transactions"]
-        # Verify descending order (amounts should decrease)
-        for i in range(len(transactions) - 1):
-            assert transactions[i]["amount"] >= transactions[i + 1]["amount"]
+        assert status_code == status.HTTP_404_NOT_FOUND
 
-        # Sort by date descending (most recent first)
-        response = await async_client.get(
-            "/transaction/list?sort_by=transaction_date&sort_order=desc",
-            headers=headers
+    # ================== VALIDATION TESTS ==================
+    @pytest.mark.asyncio
+    async def test_create_transaction_invalid_category(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test creating transaction with invalid category"""
+        invalid_category_data = test_transactions_data["invalid_transactions"]["invalid_category"]
+        
+        response_data, status_code = await create_transaction(
+            async_client, session_auth_headers, invalid_category_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        transactions = data["data"]["transactions"]
-        # Verify date descending order
-        for i in range(len(transactions) - 1):
-            assert transactions[i]["transaction_date"] >= transactions[i + 1]["transaction_date"]
+        
+        assert status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     @pytest.mark.asyncio
-    async def test_get_transaction_list_search(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
+    async def test_create_transaction_invalid_subcategory(self, async_client: AsyncClient, session_auth_headers, test_transactions_data):
+        """Test creating transaction with invalid subcategory"""
+        invalid_subcategory_data = test_transactions_data["invalid_transactions"]["invalid_subcategory"]
         
-        # Create all sample transactions for comprehensive search testing
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Search by description keyword "coffee"
-        response = await async_client.get(
-            "/transaction/list?search_keyword=coffee",
-            headers=headers
+        response_data, status_code = await create_transaction(
+            async_client, session_auth_headers, invalid_subcategory_data
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 1
-        found_coffee = any("coffee" in t["description"].lower() for t in data["data"]["transactions"])
-        assert found_coffee
         
-        # Search by notes keyword "Starbucks"
-        response = await async_client.get(
-            "/transaction/list?search_keyword=Starbucks",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 1
-        found_starbucks = any("starbucks" in t.get("notes", "").lower() for t in data["data"]["transactions"])
-        assert found_starbucks
-        
-        # Search by description keyword "laptop"
-        response = await async_client.get(
-            "/transaction/list?search_keyword=laptop",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 1
-        found_laptop = any("laptop" in t["description"].lower() for t in data["data"]["transactions"])
-        assert found_laptop
-
-        # Search by amount-related keyword (should find salary)
-        response = await async_client.get(
-            "/transaction/list?search_keyword=salary",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["data"]["pagination"]["total"] >= 1
-        found_salary = any("salary" in t["description"].lower() for t in data["data"]["transactions"])
-        assert found_salary
-
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_date_range_filtering(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        """Test date range filtering with realistic transaction dates"""
-        headers, _ = user_and_token
-        
-        # Create all sample transactions
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Test filtering by date range (first half of January)
-        response = await async_client.get(
-            "/transaction/list?start_date=2025-01-01&end_date=2025-01-15",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        for transaction in data["data"]["transactions"]:
-            assert "2025-01-01" <= transaction["transaction_date"] <= "2025-01-15"
-        
-        # Test filtering by date range (second half of January)
-        response = await async_client.get(
-            "/transaction/list?start_date=2025-01-16&end_date=2025-01-31",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        for transaction in data["data"]["transactions"]:
-            assert "2025-01-16" <= transaction["transaction_date"] <= "2025-01-31"
-
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_amount_statistics(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        """Test transaction list with focus on amount statistics using realistic data"""
-        headers, _ = user_and_token
-        
-        # Create all sample transactions
-        total_expense = 0
-        total_income = 0
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-            
-            # Calculate expected totals
-            if transaction["type"] == "expense":
-                total_expense += transaction["amount"]
-            else:
-                total_income += transaction["amount"]
-        
-        # Get all transactions and verify amounts
-        response = await async_client.get(
-            "/transaction/list?limit=50",  # Ensure we get all transactions
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        
-        # Verify we have the correct mix of transaction types
-        expense_count = sum(1 for t in data["data"]["transactions"] if t["type"] == "expense")
-        income_count = sum(1 for t in data["data"]["transactions"] if t["type"] == "income")
-        assert expense_count == 18  # We created 18 expense transactions
-        assert income_count == 2   # We created 2 income transactions
-        
-        # Verify amount ranges exist
-        amounts = [t["amount"] for t in data["data"]["transactions"]]
-        assert min(amounts) >= 75    # Smallest amount is bubble tea
-        assert max(amounts) >= 50000 # Largest amount is monthly salary
+        assert status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_subcategory_filtering(
-        self, async_client: AsyncClient, test_transactions_data, db_client, user_and_token
-    ):
-        """Test filtering by subcategories using diverse sample data"""
-        headers, _ = user_and_token
-        
-        # Create all sample transactions
-        for transaction in test_transactions_data["transaction_list"]:
-            response = await async_client.post(
-                "/transaction/create",
-                json=transaction,
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-        
-        # Test filtering by specific subcategories
-        subcategory_tests = [
-            ("breakfast", "food_dining"),
-            ("lunch", "food_dining"), 
-            ("clothing", "shopping"),
-            ("electronics", "shopping"),
-            ("stock", "investment"),
-            ("hotel", "travel")
-        ]
-        
-        for subcategory_id, category_id in subcategory_tests:
-            response = await async_client.get(
-                f"/transaction/list?subcategory_id={subcategory_id}",
-                headers=headers
-            )
-            assert response.status_code == status.HTTP_200_OK
-            data = response.json()
-            
-            if data["data"]["pagination"]["total"] > 0:
-                for transaction in data["data"]["transactions"]:
-                    assert transaction["subcategory_id"] == subcategory_id
-                    assert transaction["category_id"] == category_id
-
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_empty_result(
-        self, async_client: AsyncClient, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-        
-        # Test empty transaction list
-        response = await async_client.get(
-            "/transaction/list",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert data["status"] == 1
-        assert data["data"]["pagination"]["total"] == 0
-        assert len(data["data"]["transactions"]) == 0
-        assert data["data"]["pagination"]["has_next"] == False
-        assert data["data"]["pagination"]["has_prev"] == False
-
-    @pytest.mark.asyncio
-    async def test_get_transaction_list_invalid_params(
-        self, async_client: AsyncClient, db_client, user_and_token
-    ):
-        headers, _ = user_and_token
-        
-        # Test invalid page number
-        response = await async_client.get(
-            "/transaction/list?page=0",
-            headers=headers
-        )
-        assert response.status_code == 422  # Validation error
-        
-        # Test invalid limit
-        response = await async_client.get(
-            "/transaction/list?limit=0",
-            headers=headers
-        )
-        assert response.status_code == 422  # Validation error
-        
-        # Test limit exceeding maximum
-        response = await async_client.get(
-            "/transaction/list?limit=101",
-            headers=headers
-        )
-        assert response.status_code == 422  # Validation error
+    

@@ -16,19 +16,16 @@ from backend.core.model.transaction import transaction_collection
 from backend.core.model.transaction import category_collection
 from backend.core.model.transaction import subcategory_collection
 
-# Global variable to track session cleanup
-_session_db_client = None
+# Simplified fixtures and database management
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Create and manage event loop for the entire test session"""
+    """Create event loop for test session"""
     policy = asyncio.get_event_loop_policy()
     loop = policy.new_event_loop()
     asyncio.set_event_loop(loop)
     yield loop
-    # Ensure proper cleanup
     try:
-        # Cancel all running tasks
         pending = asyncio.all_tasks(loop)
         for task in pending:
             task.cancel()
@@ -43,62 +40,27 @@ def client():
     with TestClient(app) as c:
         yield c
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="session")
 async def async_client():
+    """Session-scoped async client for better performance"""
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture
 async def db_client():
+    """Database client with automatic cleanup"""
     client = MongoAsyncClient(test_mode=True)
     try:
-        yield client
+        # Clean before test
         await cleanup_test_db(client)
+        yield client
     finally:
+        # Clean after test
+        await cleanup_test_db(client)
         await safe_close_client(client)
 
-# Session-level cleanup with proper resource management
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def setup_test_session():
-    """Clean database at the start of test session"""
-    global _session_db_client
-    
-    _session_db_client = MongoAsyncClient(test_mode=True)
-    try:
-        await cleanup_test_db(_session_db_client)
-        yield
-        await cleanup_test_db(_session_db_client)
-    except Exception as e:
-        print(f"Error during session setup/cleanup: {e}")
-    finally:
-        if _session_db_client:
-            await safe_close_client(_session_db_client)
-            _session_db_client = None
-
-# Function-level cleanup with shared client
-@pytest_asyncio.fixture(scope="function", autouse=True)
-async def cleanup_after_test():
-    """Automatically clean database after every test"""
-    yield  # Let the test run first
-    
-    # Cleanup after test completes using session client if available
-    if _session_db_client:
-        try:
-            await cleanup_test_db(_session_db_client)
-        except Exception as e:
-            print(f"Warning: Cleanup after test failed: {e}")
-    else:
-        # Fallback: create temporary client
-        temp_client = MongoAsyncClient(test_mode=True)
-        try:
-            await cleanup_test_db(temp_client)
-        except Exception as e:
-            print(f"Warning: Fallback cleanup failed: {e}")
-        finally:
-            await safe_close_client(temp_client)
-
 async def safe_close_client(client):
-    """Safely close database client with error handling"""
+    """Safely close database client"""
     try:
         if client and hasattr(client, 'close'):
             await client.close()
@@ -106,21 +68,21 @@ async def safe_close_client(client):
         print(f"Warning: Database client close error: {e}")
 
 async def cleanup_test_db(db_client):
-    """Clean test database with error handling"""
+    """Clean test database efficiently"""
+    if not db_client:
+        return
     try:
-        if not db_client:
-            return
-        await db_client.delete_many(user_collection, {})
-        await db_client.delete_many(access_token_collection, {})
-        await db_client.delete_many(transaction_collection, {})
-        await db_client.delete_many(category_collection, {})
-        await db_client.delete_many(subcategory_collection, {})
+        # Clean all collections concurrently
+        collections = [user_collection, access_token_collection, transaction_collection, 
+                      category_collection, subcategory_collection]
+        cleanup_tasks = [db_client.delete_many(col, {}) for col in collections]
+        await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     except Exception as e:
         print(f"Error cleaning test database: {e}")
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="session")
 async def init_category_for_test():
-    """Initialize categories for testing"""
+    """Initialize categories for testing - session scoped for better performance"""
     try:
         await init_category()
         yield
@@ -128,21 +90,72 @@ async def init_category_for_test():
         print(f"Warning: Category initialization failed in tests: {e}")
         yield
 
-@pytest.fixture(scope="function")
+
+# Session-scoped user authentication fixture
+@pytest_asyncio.fixture(scope="session")
+async def test_user_with_auth(test_user_data, async_client, init_category_for_test):
+    """Create test users and return auth info for the entire test session"""
+    # Create user1
+    user1_response = await async_client.post("/user/create", json=test_user_data["user1"])
+    assert user1_response.status_code == 200, f"User1 creation failed: {user1_response.text}"
+    
+    # Login user1 and get token
+    login_response = await async_client.post(
+        "/auth/email/login",
+        json={"email": test_user_data["user1"]["email"], "pwd": test_user_data["user1"]["pwd"]}
+    )
+    assert login_response.status_code == 200, f"User1 login failed: {login_response.text}"
+    
+    login_data = login_response.json()
+    
+    return login_data
+
+@pytest_asyncio.fixture(scope="session")
+async def session_auth_headers(test_user_with_auth):
+    """Get authentication headers for the entire test session"""
+    return {
+        "Authorization": f"Bearer {test_user_with_auth['access_token']}"
+    }
+
+@pytest_asyncio.fixture(scope="session")
+async def session_transaction_list(async_client, session_auth_headers, test_analytics_data):
+    """Create transaction list for the entire test session"""
+    tx_list = test_analytics_data["transactions"]
+    for tx in tx_list:
+        await async_client.post("/transaction/create", json=tx, headers=session_auth_headers)
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def session_clean_db():
+    """Clean database before and after the entire test session"""
+    client = MongoAsyncClient(test_mode=True)
+    try:
+        # Clean before test session starts
+        await cleanup_test_db(client)
+        yield client
+    finally:
+        # Clean after test session ends
+        await cleanup_test_db(client)
+        await safe_close_client(client)
+
+
+# Test data fixtures - session scope for better performance since they're read-only
+@pytest.fixture(scope="session")
 def test_user_data():
+    """Load user test data from JSON file (session-scoped for performance)"""
     path = "backend/data/test_users_data.json"
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def test_transactions_data():
+    """Load transaction test data from JSON file (session-scoped for performance)"""
     path = "backend/data/test_transactions_data.json"
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def test_analytics_data():
-    """Load analytics test data from JSON file"""
+    """Load analytics test data from JSON file (session-scoped for performance)"""
     path = "backend/data/test_analytics_data.json"
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)

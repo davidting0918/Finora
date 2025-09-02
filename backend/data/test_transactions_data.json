@@ -249,5 +249,65 @@
             "description": "Other food and dining",
             "notes": "Other food and dining"
         }
-    ]
+    ],
+    "invalid_transactions": {
+        "missing_required_fields": {
+            "currency": "TWD",
+            "amount": 1000
+        },
+        "invalid_amount_negative": {
+            "type": "expense",
+            "currency": "TWD", 
+            "amount": -100,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast"
+        },
+        "invalid_amount_zero": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 0,
+            "transaction_date": "2025-08-01", 
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast"
+        },
+        "invalid_category": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "non_existent_category",
+            "subcategory_id": "breakfast"
+        },
+        "invalid_subcategory": {
+            "type": "expense", 
+            "currency": "TWD",
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "non_existent_subcategory"
+        },
+        "long_description": {
+            "type": "expense",
+            "currency": "TWD",
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast",
+            "description": "This is a very long description that exceeds the maximum allowed length for a transaction description. It should be used to test validation of description field length limits and ensure proper error handling when users input descriptions that are too long for the database schema to handle properly."
+        },
+        "long_notes": {
+            "type": "expense",
+            "currency": "TWD", 
+            "amount": 1000,
+            "transaction_date": "2025-08-01",
+            "category_id": "food_dining",
+            "subcategory_id": "breakfast",
+            "notes": "This is an extremely long notes field that should exceed the maximum allowed length for transaction notes. The purpose is to test the validation logic and ensure that the system properly handles and rejects notes that are too long. This field should contain more than 500 characters to trigger the validation error. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        }
+    },
+    "test_constants": {
+        "non_existent_transaction_id": "999999999999999999999999",
+        "invalid_transaction_id": "invalid_id_format"
+    }
 }
