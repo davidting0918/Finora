@@ -3,7 +3,10 @@ import os
 os.environ["PYTEST_RUNNING"] = "1"
 
 import asyncio
+import hashlib
 import json
+import uuid
+from datetime import datetime as dt
 
 import pytest
 import pytest_asyncio
@@ -12,7 +15,7 @@ from httpx import AsyncClient
 
 from backend.core.database import MongoAsyncClient
 from backend.core.initializer import init_category
-from backend.core.model.auth import access_token_collection
+from backend.core.model.auth import APIKey, access_token_collection, api_key_collection
 from backend.core.model.transaction import category_collection, subcategory_collection, transaction_collection
 from backend.core.model.user import user_collection
 from backend.main import app
@@ -54,7 +57,7 @@ async def async_client():
 @pytest_asyncio.fixture
 async def db_client():
     """Database client with automatic cleanup"""
-    client = MongoAsyncClient(test_mode=True)
+    client = MongoAsyncClient()
     try:
         # Clean before test
         await cleanup_test_db(client)
@@ -86,6 +89,7 @@ async def cleanup_test_db(db_client):
             transaction_collection,
             category_collection,
             subcategory_collection,
+            api_key_collection,
         ]
         cleanup_tasks = [db_client.delete_many(col, {}) for col in collections]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
@@ -130,6 +134,28 @@ async def session_auth_headers(test_user_with_auth):
 
 
 @pytest_asyncio.fixture(scope="session")
+async def session_api_key_headers():
+    """Get API key headers for the entire test session"""
+    """Initialize test API key for testing and store into env"""
+    db = MongoAsyncClient()
+    try:
+        existing_api_key = await db.find_one(api_key_collection, {"name": "pytest"})
+        if existing_api_key:
+            os.environ["TEST_API_KEY"] = existing_api_key["api_key"]
+            os.environ["TEST_API_SECRET"] = existing_api_key["api_secret"]
+        else:
+            api_key = APIKey(
+                name=f"pytest-{dt.now().strftime('%Y%m%d%H%M%S')}",
+                api_key=str(uuid.uuid4().hex),
+                api_secret=hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest(),
+            )
+            await db.insert_one(api_key_collection, api_key.model_dump())
+        return {"Authorization": f"Bearer {api_key.api_key}"}
+    finally:
+        await db.close()
+
+
+@pytest_asyncio.fixture(scope="session")
 async def session_transaction_list(async_client, session_auth_headers, test_analytics_data):
     """Create transaction list for the entire test session"""
     tx_list = test_analytics_data["transactions"]
@@ -140,7 +166,7 @@ async def session_transaction_list(async_client, session_auth_headers, test_anal
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def session_clean_db():
     """Clean database before and after the entire test session"""
-    client = MongoAsyncClient(test_mode=True)
+    client = MongoAsyncClient()
     try:
         # Clean before test session starts
         await cleanup_test_db(client)

@@ -1,4 +1,6 @@
 import os
+from datetime import datetime as dt
+from datetime import timezone as tz
 
 from dotenv import load_dotenv
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
@@ -47,6 +49,9 @@ class AccessToken(BaseModel):
     is_active: bool = True
 
 
-class APIKeyRequest(BaseModel):
+class APIKey(BaseModel):
+    name: str
     api_key: str
     api_secret: str
+    is_active: bool = True
+    created_at: int = int(dt.now(tz.utc).timestamp())
