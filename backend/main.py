@@ -1,3 +1,5 @@
+import os
+from argparse import ArgumentParser
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -56,4 +58,13 @@ async def scalar():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    parser = ArgumentParser()
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--is_test", action="store_true", default=False)
+    args = parser.parse_args()
+
+    if args.is_test:
+        os.environ["PYTEST_RUNNING"] = "1"
+
+    uvicorn.run(app, host=args.host, port=args.port)
