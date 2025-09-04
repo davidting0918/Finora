@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,29 +9,45 @@ load_dotenv("backend/.env")
 
 
 class MongoAsyncClient:
-    def __init__(self, test_mode: bool = False):
+    def __init__(self, environment: Optional[str] = None):
         """
-        Initialize MongoDB async client
+        Initialize MongoDB async client with environment support
 
         Args:
-            test_mode (bool): If True, use test database configuration
+            environment (str): Environment name (test, staging, prod).
+                              If None, auto-detect from APP_ENV or PYTEST_RUNNING
         """
-        if test_mode is False:
-            test_mode = os.getenv("PYTEST_RUNNING") == "1"
+        if environment is None:
+            if os.getenv("PYTEST_RUNNING") == "1":
+                environment = "test"
+            else:
+                environment = os.getenv("APP_ENV", "prod")
 
-        self.test_mode = test_mode
-
+        self.environment = environment
         self.db_url = os.getenv("MONGO_URL")
-        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if self.test_mode else "MONGO_DB_NAME")
+
+        if environment == "test":
+            self.db_name = os.getenv("MONGO_TEST_DB_NAME")
+        elif environment == "staging":
+            self.db_name = os.getenv("MONGO_STAGING_DB_NAME")
+        else:  # prod
+            self.db_name = os.getenv("MONGO_PROD_DB_NAME")
 
         self.client = AsyncIOMotorClient(self.db_url)
         self.db = self.client[self.db_name]
 
+    @classmethod
+    def get_instance(cls, environment: Optional[str] = None):
+        return cls(environment)
+
     def reload(self):
-        test_mode = os.getenv("PYTEST_RUNNING") == "1"
-        self.test_mode = test_mode
-        self.db_name = os.getenv("MONGO_TEST_DB_NAME" if self.test_mode else "MONGO_DB_NAME")
-        self.db = self.client[self.db_name]
+        if os.getenv("PYTEST_RUNNING") == "1":
+            new_env = "test"
+        else:
+            new_env = os.getenv("APP_ENV", "prod")
+
+        if new_env != self.environment:
+            self.__init__(new_env)
 
     def list_collections(self):
         """List all collections in the database"""

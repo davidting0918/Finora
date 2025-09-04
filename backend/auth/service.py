@@ -6,6 +6,7 @@ from datetime import timezone as tz
 from typing import Annotated, Optional
 
 from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
 from backend.auth.providers.google import GoogleAuthProvider
@@ -16,6 +17,8 @@ from backend.core.model.auth import (
     ALGORITHM,
     AccessToken,
     access_token_collection,
+    api_key_collection,
+    api_key_scheme,
     oauth2_scheme,
     pwd_context,
 )
@@ -27,7 +30,6 @@ _db = MongoAsyncClient()
 class AuthService:
     def __init__(self):
         self.db = _db
-        self.db.reload()
         self.google_provider = GoogleAuthProvider(
             client_id=os.getenv("GOOGLE_CLIENT_ID"), client_secret=os.getenv("GOOGLE_CLIENT_SECRET")
         )
@@ -182,3 +184,36 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+# API Key authentication dependency
+async def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(api_key_scheme)) -> bool:
+    """
+    Dependency function to verify API key and secret from request headers
+    Expects Authorization header with Bearer token containing "key:secret"
+    """
+    if not credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key required")
+
+    try:
+        # Extract key and secret from Bearer token (format: "key:secret")
+        token = credentials.credentials
+        if ":" not in token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key format")
+
+        provided_key, provided_secret = token.split(":", 1)
+
+        # Get API key from database
+        key = await _db.find_one(api_key_collection, {"api_key": provided_key})
+
+        if not key:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+
+        # Verify secret matches if provided
+        if provided_secret and provided_secret != key["api_secret"]:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key or secret")
+
+        return True
+
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key format")
