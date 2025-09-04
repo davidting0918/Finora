@@ -1,0 +1,103 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket 測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            padding: 10px;
+            overflow-y: scroll;
+            margin: 10px 0;
+        }
+        input[type="text"] { width: 300px; padding: 5px; }
+        button { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket 測試頁面</h1>
+
+    <!-- 步驟 5a：顯示訊息的區域 -->
+    <div id="messages"></div>
+
+    <!-- 步驟 5b：輸入和發送訊息 -->
+    <input type="text" id="messageInput" placeholder="輸入你的訊息...">
+    <button onclick="sendMessage()">發送訊息</button>
+    <button onclick="connectWebSocket()">連接</button>
+    <button onclick="disconnectWebSocket()">斷開</button>
+
+    <script>
+        let socket = null;  // 存放 WebSocket 連接
+
+        // 步驟 5c：連接 WebSocket 的函數
+        function connectWebSocket() {
+            // 建立 WebSocket 連接
+            socket = new WebSocket('ws://localhost:8000/ws');
+
+            // 步驟 5d：連接成功時執行
+            socket.onopen = function(event) {
+                addMessage('✅ 連接成功！');
+                console.log('WebSocket 連接建立');
+            };
+
+            // 步驟 5e：收到訊息時執行
+            socket.onmessage = function(event) {
+                addMessage('📨 收到：' + event.data);
+                console.log('收到訊息：', event.data);
+            };
+
+            // 步驟 5f：連接關閉時執行
+            socket.onclose = function(event) {
+                addMessage('❌ 連接已關閉');
+                console.log('WebSocket 連接關閉');
+            };
+
+            // 步驟 5g：發生錯誤時執行
+            socket.onerror = function(error) {
+                addMessage('💥 發生錯誤：' + error);
+                console.log('WebSocket 錯誤：', error);
+            };
+        }
+
+        // 步驟 5h：發送訊息的函數
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (message && socket && socket.readyState === WebSocket.OPEN) {
+                // 發送訊息到伺服器
+                socket.send(message);
+                addMessage('📤 發送：' + message);
+                input.value = '';  // 清空輸入框
+            } else {
+                addMessage('⚠️ 請先連接 WebSocket 或輸入訊息');
+            }
+        }
+
+        // 步驟 5i：斷開連接的函數
+        function disconnectWebSocket() {
+            if (socket) {
+                socket.close();
+            }
+        }
+
+        // 步驟 5j：在頁面上顯示訊息的函數
+        function addMessage(message) {
+            const messages = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            messages.appendChild(messageElement);
+            messages.scrollTop = messages.scrollHeight;  // 自動捲到最底部
+        }
+
+        // 步驟 5k：按 Enter 鍵也能發送訊息
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
