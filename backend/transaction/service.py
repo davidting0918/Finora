@@ -1,9 +1,21 @@
-from backend.core.model.transaction import Transaction, Category, SubCategory, CreateTransactionRequest, transaction_collection, UpdateTransactionRequest, category_collection, subcategory_collection, TransactionListQuery, TransactionListResponse
-from backend.core.database import MongoAsyncClient
-from datetime import datetime as dt, timezone as tz, timedelta as td
-from backend.core.model.user import User
 import secrets
+from datetime import datetime as dt
+from datetime import timezone as tz
+
 from fastapi import HTTPException
+
+from backend.core.database import MongoAsyncClient
+from backend.core.model.transaction import (
+    CreateTransactionRequest,
+    Transaction,
+    TransactionListQuery,
+    TransactionListResponse,
+    UpdateTransactionRequest,
+    category_collection,
+    subcategory_collection,
+    transaction_collection,
+)
+from backend.core.model.user import User
 
 
 class TransactionService:
@@ -14,19 +26,19 @@ class TransactionService:
     async def init_cat_map(self):
         categories = await self.db.find_many(category_collection, {})
         for cat in categories:
-            self.cat_map[cat['id']] = cat
-            self.cat_map[cat['id']]['subcategories'] = {}
+            self.cat_map[cat["id"]] = cat
+            self.cat_map[cat["id"]]["subcategories"] = {}
 
         subcategories = await self.db.find_many(subcategory_collection, {})
         for subcat in subcategories:
-            self.cat_map[subcat['category_id']]['subcategories'][subcat['id']] = subcat
+            self.cat_map[subcat["category_id"]]["subcategories"][subcat["id"]] = subcat
 
         return
 
     @staticmethod
     def _new_transaction_id():
         return str(secrets.token_hex(16))
-    
+
     async def create_transaction(self, request: CreateTransactionRequest, current_user: User):
         if not self.cat_map:
             await self.init_cat_map()
@@ -35,9 +47,8 @@ class TransactionService:
         if request.category_id.value not in self.cat_map:
             raise HTTPException(status_code=404, detail=f"Category {request.category_id} not found")
 
-        if request.subcategory_id.value not in self.cat_map[request.category_id.value]['subcategories']:
+        if request.subcategory_id.value not in self.cat_map[request.category_id.value]["subcategories"]:
             raise HTTPException(status_code=404, detail=f"Subcategory {request.subcategory_id} not found")
-
 
         transaction = Transaction(
             id=self._new_transaction_id(),
@@ -54,29 +65,23 @@ class TransactionService:
             tags=request.tags,
             created_at=int(dt.now(tz.utc).timestamp()),
             updated_at=int(dt.now(tz.utc).timestamp()),
-            is_deleted=False
+            is_deleted=False,
         )
-        await self.db.insert_one(transaction_collection, transaction.model_dump(mode='json'))
+        await self.db.insert_one(transaction_collection, transaction.model_dump(mode="json"))
         return transaction
-        
+
     async def get_transaction(self, transaction_id: str, current_user: User) -> Transaction:
-        transaction = await self.db.find_one(
-            transaction_collection,
-            {"id": transaction_id, "user_id": current_user.id}
-        )
+        transaction = await self.db.find_one(transaction_collection, {"id": transaction_id, "user_id": current_user.id})
         if not transaction:
             raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} not found")
         transaction = Transaction(**transaction)
         return transaction
-    
+
     async def update_transaction(self, transaction_id: str, request: UpdateTransactionRequest, current_user: User):
-        transaction = await self.db.find_one(
-            transaction_collection,
-            {"id": transaction_id, "user_id": current_user.id}
-        )
+        transaction = await self.db.find_one(transaction_collection, {"id": transaction_id, "user_id": current_user.id})
         if not transaction:
             raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} not found")
-        
+
         transaction = Transaction(
             **transaction,
         )
@@ -85,24 +90,19 @@ class TransactionService:
         await self.db.update_one(
             transaction_collection,
             {"id": transaction_id, "user_id": current_user.id},
-            transaction.model_dump(mode='json')
+            transaction.model_dump(mode="json"),
         )
         return transaction
 
     async def delete_transaction(self, transaction_id: str, current_user: User):
         # check if transaction exists
-        transaction = await self.db.find_one(
-            transaction_collection,
-            {"id": transaction_id, "user_id": current_user.id}
-        )
+        transaction = await self.db.find_one(transaction_collection, {"id": transaction_id, "user_id": current_user.id})
         if not transaction:
             raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} not found")
 
         # soft delete
         await self.db.update_one(
-            transaction_collection,
-            {"id": transaction_id, "user_id": current_user.id},
-            {"is_deleted": True}
+            transaction_collection, {"id": transaction_id, "user_id": current_user.id}, {"is_deleted": True}
         )
 
     async def get_transaction_list(self, query: TransactionListQuery, current_user: User) -> TransactionListResponse:
@@ -110,10 +110,7 @@ class TransactionService:
         Get paginated list of transactions with filtering and sorting
         """
         # Build MongoDB query filter
-        filter_conditions = {
-            "user_id": current_user.id,
-            "is_deleted": False
-        }
+        filter_conditions = {"user_id": current_user.id, "is_deleted": False}
 
         # Add date range filter
         if query.start_date or query.end_date:
@@ -127,7 +124,7 @@ class TransactionService:
                 end_date = query.end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
                 end_timestamp = int(end_date.timestamp())
                 date_filter["$lte"] = end_timestamp
-            
+
             # Use created_at for timestamp comparison since transaction_date is datetime
             filter_conditions["created_at"] = date_filter
 
@@ -139,7 +136,7 @@ class TransactionService:
         if query.category_id:
             filter_conditions["category_id"] = query.category_id.value
 
-        # Add subcategory filter  
+        # Add subcategory filter
         if query.subcategory_id:
             filter_conditions["subcategory_id"] = query.subcategory_id.value
 
@@ -160,7 +157,7 @@ class TransactionService:
             filter=filter_conditions,
             sort_criteria=sort_criteria,
             skip=skip,
-            limit=query.limit
+            limit=query.limit,
         )
 
         # Convert documents to Transaction objects
@@ -182,8 +179,7 @@ class TransactionService:
             limit=query.limit,
             total_pages=total_pages,
             has_next=query.page < total_pages,
-            has_prev=query.page > 1
+            has_prev=query.page > 1,
         )
 
         return response
-        

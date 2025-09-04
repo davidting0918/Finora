@@ -7,7 +7,34 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  test:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install pre-commit
+      run: |
+        python -m pip install pre-commit
+
+    - name: Run pre-commit
+      run: |
+        cd backend && pre-commit run --all-files
+
+  test-endpoints-function:
     runs-on: ubuntu-latest
     environment: TEST_ENV
 
@@ -19,7 +46,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.13'
-        
+
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
@@ -83,31 +110,3 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
-
-#   lint:
-#     runs-on: ubuntu-latest
-    
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-      
-#     - name: Set up Python
-#       uses: actions/setup-python@v4
-#       with:
-#         python-version: '3.11'
-        
-#     - name: Install dependencies
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install flake8 black isort mypy
-        
-#     - name: Code style check
-#       run: |
-#         # Check code style
-#         flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
-#         # Check code formatting
-#         black --check backend
-#         # Check import sorting
-#         isort --check-only backend
-#         # Type checking
-#         mypy backend --ignore-missing-imports

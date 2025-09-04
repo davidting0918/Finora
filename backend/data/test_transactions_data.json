@@ -257,7 +257,7 @@
         },
         "invalid_amount_negative": {
             "type": "expense",
-            "currency": "TWD", 
+            "currency": "TWD",
             "amount": -100,
             "transaction_date": "2025-08-01",
             "category_id": "food_dining",
@@ -267,7 +267,7 @@
             "type": "expense",
             "currency": "TWD",
             "amount": 0,
-            "transaction_date": "2025-08-01", 
+            "transaction_date": "2025-08-01",
             "category_id": "food_dining",
             "subcategory_id": "breakfast"
         },
@@ -280,7 +280,7 @@
             "subcategory_id": "breakfast"
         },
         "invalid_subcategory": {
-            "type": "expense", 
+            "type": "expense",
             "currency": "TWD",
             "amount": 1000,
             "transaction_date": "2025-08-01",
@@ -298,7 +298,7 @@
         },
         "long_notes": {
             "type": "expense",
-            "currency": "TWD", 
+            "currency": "TWD",
             "amount": 1000,
             "transaction_date": "2025-08-01",
             "category_id": "food_dining",

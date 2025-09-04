@@ -1,22 +1,24 @@
 import os
+
 os.environ["PYTEST_RUNNING"] = "1"
+
+import asyncio
+import json
 
 import pytest
 import pytest_asyncio
-import asyncio
-import json
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
-from backend.main import app
+
 from backend.core.database import MongoAsyncClient
 from backend.core.initializer import init_category
-from backend.core.model.user import user_collection
 from backend.core.model.auth import access_token_collection
-from backend.core.model.transaction import transaction_collection
-from backend.core.model.transaction import category_collection
-from backend.core.model.transaction import subcategory_collection
+from backend.core.model.transaction import category_collection, subcategory_collection, transaction_collection
+from backend.core.model.user import user_collection
+from backend.main import app
 
 # Simplified fixtures and database management
+
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -35,16 +37,19 @@ def event_loop():
     except Exception as e:
         print(f"Warning: Event loop cleanup error: {e}")
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as c:
         yield c
+
 
 @pytest_asyncio.fixture(scope="session")
 async def async_client():
     """Session-scoped async client for better performance"""
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
+
 
 @pytest_asyncio.fixture
 async def db_client():
@@ -59,13 +64,15 @@ async def db_client():
         await cleanup_test_db(client)
         await safe_close_client(client)
 
+
 async def safe_close_client(client):
     """Safely close database client"""
     try:
-        if client and hasattr(client, 'close'):
+        if client and hasattr(client, "close"):
             await client.close()
     except Exception as e:
         print(f"Warning: Database client close error: {e}")
+
 
 async def cleanup_test_db(db_client):
     """Clean test database efficiently"""
@@ -73,12 +80,18 @@ async def cleanup_test_db(db_client):
         return
     try:
         # Clean all collections concurrently
-        collections = [user_collection, access_token_collection, transaction_collection, 
-                      category_collection, subcategory_collection]
+        collections = [
+            user_collection,
+            access_token_collection,
+            transaction_collection,
+            category_collection,
+            subcategory_collection,
+        ]
         cleanup_tasks = [db_client.delete_many(col, {}) for col in collections]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     except Exception as e:
         print(f"Error cleaning test database: {e}")
+
 
 @pytest_asyncio.fixture(scope="session")
 async def init_category_for_test():
@@ -98,24 +111,23 @@ async def test_user_with_auth(test_user_data, async_client, init_category_for_te
     # Create user1
     user1_response = await async_client.post("/user/create", json=test_user_data["user1"])
     assert user1_response.status_code == 200, f"User1 creation failed: {user1_response.text}"
-    
+
     # Login user1 and get token
     login_response = await async_client.post(
-        "/auth/email/login",
-        json={"email": test_user_data["user1"]["email"], "pwd": test_user_data["user1"]["pwd"]}
+        "/auth/email/login", json={"email": test_user_data["user1"]["email"], "pwd": test_user_data["user1"]["pwd"]}
     )
     assert login_response.status_code == 200, f"User1 login failed: {login_response.text}"
-    
+
     login_data = login_response.json()
-    
+
     return login_data
+
 
 @pytest_asyncio.fixture(scope="session")
 async def session_auth_headers(test_user_with_auth):
     """Get authentication headers for the entire test session"""
-    return {
-        "Authorization": f"Bearer {test_user_with_auth['access_token']}"
-    }
+    return {"Authorization": f"Bearer {test_user_with_auth['access_token']}"}
+
 
 @pytest_asyncio.fixture(scope="session")
 async def session_transaction_list(async_client, session_auth_headers, test_analytics_data):
@@ -123,6 +135,7 @@ async def session_transaction_list(async_client, session_auth_headers, test_anal
     tx_list = test_analytics_data["transactions"]
     for tx in tx_list:
         await async_client.post("/transaction/create", json=tx, headers=session_auth_headers)
+
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def session_clean_db():
@@ -146,6 +159,7 @@ def test_user_data():
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 @pytest.fixture(scope="session")
 def test_transactions_data():
     """Load transaction test data from JSON file (session-scoped for performance)"""
@@ -153,10 +167,10 @@ def test_transactions_data():
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 @pytest.fixture(scope="session")
 def test_analytics_data():
     """Load analytics test data from JSON file (session-scoped for performance)"""
     path = "backend/data/test_analytics_data.json"
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
-

@@ -1,16 +1,20 @@
-from pydantic import BaseModel, field_validator
-from typing import Optional, List
-from datetime import datetime as dt, timezone as tz, timedelta as td
+from datetime import datetime as dt
+from datetime import timezone as tz
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, field_validator
 
 # Database collection names
 transaction_collection = "transactions"
-category_collection = "categories" 
+category_collection = "categories"
 subcategory_collection = "subcategories"
+
 
 class TransactionType(Enum):
     income = "income"
     expense = "expense"
+
 
 class Currency(Enum):
     USD = "USD"
@@ -23,8 +27,9 @@ class Currency(Enum):
     HKD = "HKD"
     TWD = "TWD"
 
+
 class CategoryId(Enum):
-    #expense
+    # expense
     shopping = "shopping"
     food_dining = "food_dining"
     transportation = "transportation"
@@ -33,13 +38,14 @@ class CategoryId(Enum):
     education = "education"
     health = "health"
     investment = "investment"
-    travel = "travel" 
+    travel = "travel"
 
     # income
     income = "income"
 
     # other
     other = "other"
+
 
 class SubCategoryId(Enum):
     # food_dining
@@ -105,7 +111,6 @@ class SubCategoryId(Enum):
     other = "other"
 
 
-
 class SubCategory(BaseModel):
     id: str
     category_id: str
@@ -113,15 +118,16 @@ class SubCategory(BaseModel):
     color: str
     icon: str
     is_active: bool = True
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
-            raise ValueError('Name cannot be empty')
+            raise ValueError("Name cannot be empty")
         if len(v.strip()) > 50:
-            raise ValueError('Name must be 50 characters or less')
+            raise ValueError("Name must be 50 characters or less")
         return v.strip()
+
 
 class Category(BaseModel):
     id: str
@@ -130,18 +136,19 @@ class Category(BaseModel):
     color: str
     icon: str
     is_active: bool = True
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
-            raise ValueError('Name cannot be empty')
+            raise ValueError("Name cannot be empty")
         if len(v.strip()) > 50:
-            raise ValueError('Name must be 50 characters or less')
+            raise ValueError("Name must be 50 characters or less")
         return v.strip()
 
 
 # API related model
+
 
 class CreateTransactionRequest(BaseModel):
     type: TransactionType
@@ -153,6 +160,7 @@ class CreateTransactionRequest(BaseModel):
     description: Optional[str] = None
     notes: Optional[str] = None
     tags: Optional[List[str]] = None
+
 
 class UpdateTransactionRequest(BaseModel):
     type: Optional[TransactionType] = None
@@ -176,33 +184,33 @@ class TransactionListQuery(BaseModel):
     subcategory_id: Optional[SubCategoryId] = None
     sort_by: str = "transaction_date"  # transaction_date, amount, created_at
     sort_order: str = "desc"  # asc, desc
-    
-    @field_validator('page')
+
+    @field_validator("page")
     @classmethod
     def validate_page(cls, v):
         if v < 1:
-            raise ValueError('Page must be greater than 0')
+            raise ValueError("Page must be greater than 0")
         return v
-    
-    @field_validator('limit')
+
+    @field_validator("limit")
     @classmethod
     def validate_limit(cls, v):
         if v < 1 or v > 100:
-            raise ValueError('Limit must be between 1 and 100')
+            raise ValueError("Limit must be between 1 and 100")
         return v
-    
-    @field_validator('sort_by')
+
+    @field_validator("sort_by")
     @classmethod
     def validate_sort_by(cls, v):
-        allowed_fields = ['transaction_date', 'amount', 'created_at', 'updated_at']
+        allowed_fields = ["transaction_date", "amount", "created_at", "updated_at"]
         if v not in allowed_fields:
             raise ValueError(f'sort_by must be one of: {", ".join(allowed_fields)}')
         return v
-    
-    @field_validator('sort_order')
+
+    @field_validator("sort_order")
     @classmethod
     def validate_sort_order(cls, v):
-        if v not in ['asc', 'desc']:
+        if v not in ["asc", "desc"]:
             raise ValueError('sort_order must be either "asc" or "desc"')
         return v
 
@@ -223,30 +231,30 @@ class Transaction(BaseModel):
     created_at: int
     updated_at: int
     is_deleted: bool = False
-    
-    @field_validator('amount')
+
+    @field_validator("amount")
     @classmethod
     def validate_amount(cls, v):
         if v <= 0:
-            raise ValueError('Amount must be greater than 0')
+            raise ValueError("Amount must be greater than 0")
         return v
-    
-    @field_validator('description')
+
+    @field_validator("description")
     @classmethod
     def validate_description(cls, v):
         if v and len(v) > 200:
-            raise ValueError('Description must be 200 characters or less')
+            raise ValueError("Description must be 200 characters or less")
         return v
-    
-    @field_validator('notes')
+
+    @field_validator("notes")
     @classmethod
     def validate_notes(cls, v):
         if v and len(v) > 500:
-            raise ValueError('Notes must be 500 characters or less')
+            raise ValueError("Notes must be 500 characters or less")
         return v
-    
+
     def update(self, request: UpdateTransactionRequest):
-        for key, value in request.model_dump(mode='json').items():
+        for key, value in request.model_dump(mode="json").items():
             if value is not None:
                 setattr(self, key, value)
         self.updated_at = int(dt.now(tz.utc).timestamp())

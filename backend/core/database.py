@@ -1,28 +1,28 @@
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 # Load environment variables
 load_dotenv("backend/.env")
 
+
 class MongoAsyncClient:
-    def __init__(self, test_mode: bool = None):
+    def __init__(self, test_mode: bool = False):
         """
         Initialize MongoDB async client
-        
+
         Args:
             test_mode (bool): If True, use test database configuration
-            test_db_url (str): Override database URL for testing
-            test_db_name (str): Override database name for testing
         """
-        if test_mode is None:
+        if test_mode is False:
             test_mode = os.getenv("PYTEST_RUNNING") == "1"
 
-        self.test_mode = test_mode  
+        self.test_mode = test_mode
 
         self.db_url = os.getenv("MONGO_URL")
         self.db_name = os.getenv("MONGO_TEST_DB_NAME" if self.test_mode else "MONGO_DB_NAME")
-        
+
         self.client = AsyncIOMotorClient(self.db_url)
         self.db = self.client[self.db_name]
 
@@ -53,7 +53,7 @@ class MongoAsyncClient:
         collection = self.db[collection]
         document = await collection.find_one(filter)
         if document:
-            document.pop('_id', None)
+            document.pop("_id", None)
         return document
 
     async def find_many(self, collection: str, filter: dict = None):
@@ -65,7 +65,7 @@ class MongoAsyncClient:
         documents = await cursor.to_list(length=None)
         results = []
         for document in documents:
-            document.pop('_id', None)
+            document.pop("_id", None)
             results.append(document)
         return results
 
@@ -100,52 +100,49 @@ class MongoAsyncClient:
             filter = {}
         return await collection.count_documents(filter)
 
-    async def find_with_pagination(self, 
-                                   collection: str, 
-                                   filter: dict = None, 
-                                   sort_criteria: list = None,
-                                   skip: int = 0,
-                                   limit: int = 20):
+    async def find_with_pagination(
+        self, collection: str, filter: dict = None, sort_criteria: list = None, skip: int = 0, limit: int = 20
+    ):
         """Find documents with pagination, sorting, and filtering
-        
+
         Args:
             collection (str): Collection name
-            filter (dict): MongoDB filter criteria  
+            filter (dict): MongoDB filter criteria
             sort_criteria (list): List of tuples [(field, direction), ...] where direction is 1 (asc) or -1 (desc)
             skip (int): Number of documents to skip
             limit (int): Maximum number of documents to return
-            
+
         Returns:
             list: List of documents with _id removed
         """
         collection = self.db[collection]
         if filter is None:
             filter = {}
-        
+
         cursor = collection.find(filter)
-        
+
         # Apply sorting if provided
         if sort_criteria:
             cursor = cursor.sort(sort_criteria)
-        
+
         # Apply pagination
         cursor = cursor.skip(skip).limit(limit)
-        
+
         # Execute query and process results
         documents = await cursor.to_list(length=None)
         results = []
         for document in documents:
-            document.pop('_id', None)
+            document.pop("_id", None)
             results.append(document)
         return results
 
     async def aggregate(self, collection: str, pipeline: list):
         """Execute aggregation pipeline
-        
+
         Args:
             collection (str): Collection name
             pipeline (list): MongoDB aggregation pipeline
-            
+
         Returns:
             list: Aggregation results with _id removed
         """
@@ -153,7 +150,7 @@ class MongoAsyncClient:
         cursor = collection.aggregate(pipeline)
         results = []
         async for document in cursor:
-            document.pop('_id', None)
+            document.pop("_id", None)
             results.append(document)
         return results
 

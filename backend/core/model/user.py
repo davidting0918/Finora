@@ -1,8 +1,10 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 user_collection = "users"
+
 
 class User(BaseModel):
     id: str
@@ -13,6 +15,7 @@ class User(BaseModel):
     created_at: int
     updated_at: int
     is_active: bool = True
+
 
 class UserInfo(BaseModel):
     id: str
@@ -27,8 +30,8 @@ class CreateUserRequest(BaseModel):
     email: EmailStr
     name: str = Field(..., min_length=2, max_length=50)
     pwd: str = Field(..., min_length=8, max_length=128)
-    
-    @field_validator('pwd')
+
+    @field_validator("pwd")
     @classmethod
     def validate_password(cls, v):
         """
@@ -40,23 +43,23 @@ class CreateUserRequest(BaseModel):
         - At least one special character
         """
         if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        if not re.search(r'[A-Z]', v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not re.search(r'[a-z]', v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not re.search(r'\d', v):
-            raise ValueError('Password must contain at least one digit')
+            raise ValueError("Password must be at least 8 characters long")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one digit")
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
-            raise ValueError('Password must contain at least one special character')
+            raise ValueError("Password must contain at least one special character")
         return v
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         """Validate username format"""
         if not v.strip():
-            raise ValueError('Username cannot be empty')
+            raise ValueError("Username cannot be empty")
         if len(v.strip()) < 2:
-            raise ValueError('Username must be at least 2 characters long')
+            raise ValueError("Username must be at least 2 characters long")
         return v.strip()
