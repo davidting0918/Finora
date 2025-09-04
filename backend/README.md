@@ -484,7 +484,7 @@ GET /transaction/category
           "icon": "🥗"
         },
         "dinner": {
-          "id": "dinner", 
+          "id": "dinner",
           "name": "Dinner",
           "color": "#FF8E53",
           "icon": "🍽️"
@@ -517,14 +517,14 @@ GET /transaction/subcategory/food_dining
   "data": {
     "breakfast": {
       "id": "breakfast",
-      "name": "Breakfast", 
+      "name": "Breakfast",
       "color": "#95E1D3",
       "icon": "🥞"
     },
     "lunch": {
       "id": "lunch",
       "name": "Lunch",
-      "color": "#FFE66D", 
+      "color": "#FFE66D",
       "icon": "🥗"
     },
     "dinner": {

@@ -1,6 +1,8 @@
-from backend.core.model.auth import GoogleAuthRequest, GoogleUserInfo
-from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+
+from backend.core.model.auth import GoogleUserInfo
+
 
 class GoogleAuthProvider:
     def __init__(self, client_id: str, client_secret: str):

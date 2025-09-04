@@ -1,9 +1,9 @@
-from pydantic import BaseModel
-from dotenv import load_dotenv
 import os
-from typing import Optional
-from passlib.context import CryptContext
+
+from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
 load_dotenv("backend/.env")
 
@@ -22,15 +22,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/access_token")
 class GoogleAuthRequest(BaseModel):
     token: str
 
+
 class GoogleUserInfo(BaseModel):
     id: str
     email: str
     name: str
     picture: str
 
+
 class EmailAuthRequest(BaseModel):
     email: str
     pwd: str
+
 
 class AccessToken(BaseModel):
     token: str

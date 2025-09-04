@@ -875,7 +875,7 @@
       "tags": ["breakfast", "quick", "convenience", "busy"]
     },
     {
-      "type": "expense", 
+      "type": "expense",
       "currency": "TWD",
       "amount": 1200,
       "transaction_date": "2024-12-16",

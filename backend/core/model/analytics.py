@@ -1,13 +1,17 @@
-from pydantic import BaseModel, field_validator
-from typing import Optional, List, Dict, Any
 from datetime import datetime as dt
-from backend.core.model.transaction import TransactionType, CategoryId, Currency
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
+
+from backend.core.model.transaction import CategoryId, TransactionType
+
 
 class AnalyticsPeriod(Enum):
     weekly = "weekly"
     monthly = "monthly"
     yearly = "yearly"
+
 
 class AnalyticsQuery(BaseModel):
     start_date: Optional[dt] = None
@@ -15,7 +19,8 @@ class AnalyticsQuery(BaseModel):
     period: AnalyticsPeriod = AnalyticsPeriod.monthly
     transaction_type: Optional[TransactionType] = None
     category_id: Optional[CategoryId] = None
-    
+
+
 class CategoryAnalytics(BaseModel):
     category_id: str
     category_name: str
@@ -24,6 +29,7 @@ class CategoryAnalytics(BaseModel):
     percentage: float
     subcategories: List[Dict[str, Any]]
 
+
 class PeriodAnalytics(BaseModel):
     period: str
     income: float
@@ -31,16 +37,19 @@ class PeriodAnalytics(BaseModel):
     net: float
     transaction_count: int
 
+
 class SpendingTrend(BaseModel):
     date: str
     amount: float
     transaction_count: int
+
 
 class TagAnalytics(BaseModel):
     tag: str
     total_amount: float
     transaction_count: int
     avg_amount: float
+
 
 class FinancialSummary(BaseModel):
     total_income: float
@@ -49,6 +58,7 @@ class FinancialSummary(BaseModel):
     avg_daily_expense: float
     largest_expense: Dict[str, Any]
     most_frequent_category: Dict[str, Any]
+
 
 class AnalyticsOverview(BaseModel):
     summary: FinancialSummary

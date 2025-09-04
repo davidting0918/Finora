@@ -1,9 +1,13 @@
-from backend.core.database import MongoAsyncClient
-from backend.core.model.user import user_collection, User, CreateUserRequest, UserInfo
-from fastapi import HTTPException
 import uuid
+from datetime import datetime as dt
+from datetime import timezone as tz
+
+from fastapi import HTTPException
+
+from backend.core.database import MongoAsyncClient
 from backend.core.model.auth import pwd_context
-from datetime import datetime as dt, timezone as tz
+from backend.core.model.user import CreateUserRequest, User, UserInfo, user_collection
+
 
 class UserService:
     def __init__(self):
@@ -11,13 +15,10 @@ class UserService:
 
     async def create_user(self, request: CreateUserRequest) -> UserInfo:
         # first check if user already exists
-        user = await self.db.find_one(
-            user_collection,
-            {"email": request.email}
-        )
+        user = await self.db.find_one(user_collection, {"email": request.email})
         if user:
             raise HTTPException(status_code=400, detail="User already exists")
-        
+
         # create user
         user = User(
             id=str(uuid.uuid4())[:8],
@@ -26,7 +27,7 @@ class UserService:
             hashed_pwd=pwd_context.hash(request.pwd),
             created_at=int(dt.now(tz.utc).timestamp()),
             updated_at=int(dt.now(tz.utc).timestamp()),
-            is_active=True
+            is_active=True,
         )
         await self.db.insert_one(user_collection, user.model_dump())
         return UserInfo(
@@ -35,9 +36,9 @@ class UserService:
             name=user.name,
             created_at=user.created_at,
             updated_at=user.updated_at,
-            is_active=user.is_active
+            is_active=user.is_active,
         )
-    
+
     async def get_user_info(self, user_id: str) -> UserInfo:
         user_dict = await self.db.find_one(user_collection, {"id": user_id})
         if not user_dict:
@@ -49,5 +50,5 @@ class UserService:
             name=user.name,
             created_at=user.created_at,
             updated_at=user.updated_at,
-            is_active=user.is_active
+            is_active=user.is_active,
         )
