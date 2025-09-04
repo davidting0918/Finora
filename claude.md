@@ -45,7 +45,7 @@ class Transaction(BaseModel):
     created_at: int
     updated_at: int
     is_deleted: bool = False
-    
+
     # Field validations for data integrity
     @field_validator('amount')
     @classmethod
@@ -64,7 +64,7 @@ class Category(BaseModel):
     color: str
     icon: str
     is_active: bool = True
-    
+
     @field_validator('name')
     @classmethod
     def validate_name(cls, v):
@@ -84,7 +84,7 @@ class SubCategory(BaseModel):
     color: str
     icon: str
     is_active: bool = True
-    
+
     @field_validator('name')
     @classmethod
     def validate_name(cls, v):
