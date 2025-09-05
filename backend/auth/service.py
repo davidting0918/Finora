@@ -213,7 +213,10 @@ async def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(api
         if provided_secret and provided_secret != key["api_secret"]:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key or secret")
 
-        return True
+        return {
+            "api_key": key["api_key"],
+            "name": key["name"],
+        }
 
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key format")

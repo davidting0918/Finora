@@ -14,6 +14,7 @@ class User(BaseModel):
     name: str  # if login with google, then name default will be google name
     created_at: int
     updated_at: int
+    source: str = None
     is_active: bool = True
 
 
@@ -24,6 +25,7 @@ class UserInfo(BaseModel):
     created_at: int
     updated_at: int
     is_active: bool = True
+    source: str = None
 
 
 class CreateUserRequest(BaseModel):
