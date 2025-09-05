@@ -69,6 +69,7 @@ jobs:
     - name: Run User and Auth Tests
       env:
         PYTEST_RUNNING: 1
+        APP_ENV: test
         MONGO_URL: ${{ secrets.MONGO_URL }}
         MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
         MONGO_TEST_DB_NAME: ${{ secrets.MONGO_TEST_DB_NAME }}
@@ -81,6 +82,7 @@ jobs:
     - name: Run Transaction Tests
       env:
         PYTEST_RUNNING: 1
+        APP_ENV: test
         MONGO_URL: ${{ secrets.MONGO_URL }}
         MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
         MONGO_TEST_DB_NAME: ${{ secrets.MONGO_TEST_DB_NAME }}
@@ -93,6 +95,7 @@ jobs:
     - name: Run Analytics Tests
       env:
         PYTEST_RUNNING: 1
+        APP_ENV: test
         MONGO_URL: ${{ secrets.MONGO_URL }}
         MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
         MONGO_TEST_DB_NAME: ${{ secrets.MONGO_TEST_DB_NAME }}
