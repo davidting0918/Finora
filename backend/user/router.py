@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from backend.auth.service import get_current_active_user
+from backend.auth.service import get_current_active_user, verify_api_key
 from backend.core.model.user import CreateUserRequest, User
 from backend.user.service import UserService
 
@@ -13,13 +13,13 @@ user_service = UserService()
 
 # Public endpoint - no JWT token required
 @router.post("/create")
-async def create_user(request: CreateUserRequest) -> dict:
+async def create_user(request: CreateUserRequest, api_key: Annotated[dict, Depends(verify_api_key)]) -> dict:
     """
     Create user - public endpoint, no authentication required
     Anyone can register a new account
     """
     try:
-        user_info = await user_service.create_user(request)
+        user_info = await user_service.create_user(request, api_key)
         return {"status": 1, "data": user_info.model_dump(), "message": "User registered successfully"}
     except Exception as e:
         raise e
@@ -42,6 +42,7 @@ async def get_current_user_info(current_user: Annotated[User, Depends(get_curren
                 "created_at": current_user.created_at,
                 "updated_at": current_user.updated_at,
                 "is_active": current_user.is_active,
+                "source": current_user.source,
             },
             "message": f"Welcome, {current_user.name}!",
         }

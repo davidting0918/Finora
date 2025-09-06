@@ -13,7 +13,7 @@ class UserService:
     def __init__(self):
         self.db = MongoAsyncClient()
 
-    async def create_user(self, request: CreateUserRequest) -> UserInfo:
+    async def create_user(self, request: CreateUserRequest, key_info: dict) -> UserInfo:
         # first check if user already exists
         user = await self.db.find_one(user_collection, {"email": request.email})
         if user:
@@ -28,6 +28,7 @@ class UserService:
             created_at=int(dt.now(tz.utc).timestamp()),
             updated_at=int(dt.now(tz.utc).timestamp()),
             is_active=True,
+            source=key_info["name"],
         )
         await self.db.insert_one(user_collection, user.model_dump())
         return UserInfo(
@@ -37,6 +38,7 @@ class UserService:
             created_at=user.created_at,
             updated_at=user.updated_at,
             is_active=user.is_active,
+            source=user.source,
         )
 
     async def get_user_info(self, user_id: str) -> UserInfo:
@@ -51,4 +53,5 @@ class UserService:
             created_at=user.created_at,
             updated_at=user.updated_at,
             is_active=user.is_active,
+            source=user.source,
         )

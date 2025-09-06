@@ -2,3 +2,5 @@
 venv
 __pycache__
 .vscode
+test.py
+staging_data.json

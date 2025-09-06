@@ -6,9 +6,9 @@ from backend.core.model.user import user_collection
 
 
 # Helper functions to reduce code duplication
-async def create_user(async_client: AsyncClient, user_data: dict):
+async def create_user(async_client: AsyncClient, user_data: dict, headers: dict = None):
     """Helper function to create a user"""
-    response = await async_client.post("/user/create", json=user_data)
+    response = await async_client.post("/user/create", json=user_data, headers=headers)
     return response.json(), response.status_code
 
 
@@ -39,11 +39,13 @@ class TestUserCreation:
     """Test user creation functionality"""
 
     @pytest.mark.asyncio
-    async def test_create_user_successfully(self, async_client: AsyncClient, test_user_data, db_client):
+    async def test_create_user_successfully(
+        self, async_client: AsyncClient, test_user_data, db_client, session_api_key_headers
+    ):
         """Test creating a user with valid data"""
         user_data = test_user_data["user1"]
 
-        response_data, status_code = await create_user(async_client, user_data)
+        response_data, status_code = await create_user(async_client, user_data, session_api_key_headers)
 
         assert status_code == status.HTTP_200_OK
         assert_successful_user_creation(response_data, user_data)
@@ -54,17 +56,19 @@ class TestUserCreation:
         assert db_user["email"] == user_data["email"]
 
     @pytest.mark.asyncio
-    async def test_create_multiple_users(self, async_client: AsyncClient, test_user_data, db_client):
+    async def test_create_multiple_users(
+        self, async_client: AsyncClient, test_user_data, db_client, session_api_key_headers
+    ):
         """Test creating multiple users from test data"""
         # Create first user
         user1 = test_user_data["user1"]
-        data1, status1 = await create_user(async_client, user1)
+        data1, status1 = await create_user(async_client, user1, session_api_key_headers)
         assert status1 == status.HTTP_200_OK
         assert_successful_user_creation(data1, user1)
 
         # Create second user
         user2 = test_user_data["user2"]
-        data2, status2 = await create_user(async_client, user2)
+        data2, status2 = await create_user(async_client, user2, session_api_key_headers)
         assert status2 == status.HTTP_200_OK
         assert_successful_user_creation(data2, user2)
 
@@ -72,28 +76,28 @@ class TestUserCreation:
         assert data1["data"]["id"] != data2["data"]["id"]
 
     @pytest.mark.asyncio
-    async def test_duplicate_email_fails(self, async_client: AsyncClient, test_user_data):
+    async def test_duplicate_email_fails(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
         """Test that duplicate email creation fails"""
         user = test_user_data["user1"]
 
         # Create first user
-        response_data, status_code = await create_user(async_client, user)
+        response_data, status_code = await create_user(async_client, user, session_api_key_headers)
         assert status_code == status.HTTP_200_OK
 
         # Try to create duplicate
-        response_data, status_code = await create_user(async_client, user)
+        response_data, status_code = await create_user(async_client, user, session_api_key_headers)
         assert status_code == status.HTTP_400_BAD_REQUEST
         assert "User already exists" in response_data["detail"]
 
     @pytest.mark.asyncio
-    async def test_password_validation(self, async_client: AsyncClient, test_user_data):
+    async def test_password_validation(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
         """Test password validation rules"""
         weak_passwords = ["123456", "password", "Password", "Password123"]
 
         for i, weak_pwd in enumerate(weak_passwords):
             user_data = test_user_data["weak_pwd_user"]
             user_data["pwd"] = weak_pwd
-            response_data, status_code = await create_user(async_client, user_data)
+            response_data, status_code = await create_user(async_client, user_data, session_api_key_headers)
             assert status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -101,12 +105,14 @@ class TestUserAuthentication:
     """Test user authentication functionality"""
 
     @pytest.mark.asyncio
-    async def test_login_with_email(self, async_client: AsyncClient, test_user_data, db_client):
+    async def test_login_with_email(
+        self, async_client: AsyncClient, test_user_data, db_client, session_api_key_headers
+    ):
         """Test email login after user creation"""
         user = test_user_data["user1"]
 
         # Create user
-        create_data, create_status = await create_user(async_client, user)
+        create_data, create_status = await create_user(async_client, user, session_api_key_headers)
         assert create_status == status.HTTP_200_OK
 
         # Login
@@ -117,12 +123,12 @@ class TestUserAuthentication:
         assert login_data["token_type"] == "bearer"
 
     @pytest.mark.asyncio
-    async def test_login_with_oauth2_form(self, async_client: AsyncClient, test_user_data):
+    async def test_login_with_oauth2_form(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
         """Test OAuth2 form login after user creation"""
         user = test_user_data["user2"]
 
         # Create user
-        await create_user(async_client, user)
+        await create_user(async_client, user, session_api_key_headers)
 
         # Login with OAuth2 form
         response = await async_client.post(
@@ -136,10 +142,10 @@ class TestUserAuthentication:
         assert "access_token" in login_data and login_data["token_type"] == "bearer"
 
     @pytest.mark.asyncio
-    async def test_login_with_wrong_password(self, async_client: AsyncClient, test_user_data):
+    async def test_login_with_wrong_password(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
         """Test login with wrong password fails"""
         user = test_user_data["user1"]
-        await create_user(async_client, user)
+        await create_user(async_client, user, session_api_key_headers)
 
         login_data, login_status = await login_user(async_client, user["email"], "WrongPassword123!")
         assert login_status == status.HTTP_401_UNAUTHORIZED
@@ -150,7 +156,9 @@ class TestUserProfile:
     """Test user profile functionality"""
 
     @pytest.mark.asyncio
-    async def test_protected_endpoint_requires_auth(self, async_client: AsyncClient, test_user_data):
+    async def test_protected_endpoint_requires_auth(
+        self, async_client: AsyncClient, test_user_data, session_api_key_headers
+    ):
         """Test protected endpoint authentication"""
         # Test unauthenticated access
         response = await async_client.get("/user/me")
@@ -158,7 +166,7 @@ class TestUserProfile:
 
         # Create user and login
         user = test_user_data["user1"]
-        await create_user(async_client, user)
+        await create_user(async_client, user, session_api_key_headers)
         login_data, _ = await login_user(async_client, user["email"], user["pwd"])
 
         # Test authenticated access
@@ -167,12 +175,14 @@ class TestUserProfile:
         assert profile_data["data"]["email"] == user["email"]
 
     @pytest.mark.asyncio
-    async def test_complete_user_flow(self, async_client: AsyncClient, test_user_data, db_client):
+    async def test_complete_user_flow(
+        self, async_client: AsyncClient, test_user_data, db_client, session_api_key_headers
+    ):
         """Test complete user flow: create -> login -> profile"""
         user = test_user_data["user1"]
 
         # Create user
-        create_data, create_status = await create_user(async_client, user)
+        create_data, create_status = await create_user(async_client, user, session_api_key_headers)
         assert create_status == status.HTTP_200_OK
         user_id = create_data["data"]["id"]
 
