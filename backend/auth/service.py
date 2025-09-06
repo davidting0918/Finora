@@ -187,7 +187,7 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
 
 
 # API Key authentication dependency
-async def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(api_key_scheme)) -> bool:
+async def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(api_key_scheme)) -> dict:
     """
     Dependency function to verify API key and secret from request headers
     Expects Authorization header with Bearer token containing "key:secret"
