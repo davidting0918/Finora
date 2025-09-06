@@ -89,7 +89,6 @@ async def cleanup_test_db(db_client):
             transaction_collection,
             category_collection,
             subcategory_collection,
-            api_key_collection,
         ]
         cleanup_tasks = [db_client.delete_many(col, {}) for col in collections]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
@@ -141,8 +140,7 @@ async def session_api_key_headers():
     try:
         existing_api_key = await db.find_one(api_key_collection, {"name": "pytest"})
         if existing_api_key:
-            os.environ["TEST_API_KEY"] = existing_api_key["api_key"]
-            os.environ["TEST_API_SECRET"] = existing_api_key["api_secret"]
+            return {"Authorization": f"Bearer {existing_api_key['api_key']}:{existing_api_key['api_secret']}"}
         else:
             api_key = APIKey(
                 name=f"pytest-{dt.now().strftime('%Y%m%d%H%M%S')}",
@@ -150,7 +148,7 @@ async def session_api_key_headers():
                 api_secret=hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest(),
             )
             await db.insert_one(api_key_collection, api_key.model_dump())
-        return {"Authorization": f"Bearer {api_key.api_key}"}
+        return {"Authorization": f"Bearer {api_key.api_key}:{api_key.api_secret}"}
     finally:
         await db.close()
 
@@ -165,7 +163,7 @@ async def session_transaction_list(async_client, session_auth_headers, test_anal
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def session_clean_db():
-    """Clean database before and after the entire test session"""
+    """Clean database before and after the `entire test session"""
     client = MongoAsyncClient()
     try:
         # Clean before test session starts
