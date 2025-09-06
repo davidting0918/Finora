@@ -150,7 +150,7 @@ async def session_api_key_headers():
                 api_secret=hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest(),
             )
             await db.insert_one(api_key_collection, api_key.model_dump())
-        return {"Authorization": f"Bearer {api_key.api_key}:{api_key.api_secret}"}
+            return {"Authorization": f"Bearer {api_key.api_key}:{api_key.api_secret}"}
     finally:
         await db.close()
 
