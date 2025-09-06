@@ -109,10 +109,12 @@ async def init_category_for_test():
 
 # Session-scoped user authentication fixture
 @pytest_asyncio.fixture(scope="session")
-async def test_user_with_auth(test_user_data, async_client, init_category_for_test):
+async def test_user_with_auth(test_user_data, async_client, init_category_for_test, session_api_key_headers):
     """Create test users and return auth info for the entire test session"""
     # Create user1
-    user1_response = await async_client.post("/user/create", json=test_user_data["user1"])
+    user1_response = await async_client.post(
+        "/user/create", json=test_user_data["user1"], headers=session_api_key_headers
+    )
     assert user1_response.status_code == 200, f"User1 creation failed: {user1_response.text}"
 
     # Login user1 and get token
