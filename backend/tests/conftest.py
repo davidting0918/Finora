@@ -168,13 +168,29 @@ async def session_clean_db():
     """Clean database before and after the `entire test session"""
     client = MongoAsyncClient()
     try:
-        # Clean before test session starts
-        await cleanup_test_db(client)
-        yield client
+        # Clean all collections concurrently
+        collections = [
+            user_collection,
+            access_token_collection,
+            transaction_collection,
+            category_collection,
+            subcategory_collection,
+            api_key_collection,
+        ]
+        cleanup_tasks = [client.delete_many(col, {}) for col in collections]
+        await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     finally:
         # Clean after test session ends
-        await cleanup_test_db(client)
-        await safe_close_client(client)
+        collections = [
+            user_collection,
+            access_token_collection,
+            transaction_collection,
+            category_collection,
+            subcategory_collection,
+            api_key_collection,
+        ]
+        cleanup_tasks = [client.delete_many(col, {}) for col in collections]
+        await asyncio.gather(*cleanup_tasks, return_exceptions=True)
 
 
 # Test data fixtures - session scope for better performance since they're read-only
