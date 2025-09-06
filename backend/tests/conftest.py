@@ -165,7 +165,7 @@ async def session_transaction_list(async_client, session_auth_headers, test_anal
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def session_clean_db():
-    """Clean database before and after the `entire test session"""
+    """Clean database before and after the entire test session"""
     client = MongoAsyncClient()
     try:
         # Clean all collections concurrently
