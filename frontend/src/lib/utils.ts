@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-// 類名合併工具函數 - 登錄頁面的 GlassCard 組件需要使用
+// Class name merging utility function - used by the GlassCard component on the login page
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
