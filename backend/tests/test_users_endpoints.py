@@ -118,9 +118,13 @@ class TestUserAuthentication:
         # Login
         login_data, login_status = await login_user(async_client, user["email"], user["pwd"])
         assert login_status == status.HTTP_200_OK
-        assert "access_token" in login_data
-        assert "token_type" in login_data
-        assert login_data["token_type"] == "bearer"
+        assert login_data["status"] == 1
+        assert login_data["message"] == "Email login successful"
+        assert "access_token" in login_data["data"]
+        assert "token_type" in login_data["data"]
+        assert login_data["data"]["token_type"] == "bearer"
+        assert "user" in login_data["data"]
+        assert login_data["data"]["user"]["email"] == user["email"]
 
     @pytest.mark.asyncio
     async def test_login_with_oauth2_form(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
@@ -139,7 +143,9 @@ class TestUserAuthentication:
 
         assert response.status_code == status.HTTP_200_OK
         login_data = response.json()
-        assert "access_token" in login_data and login_data["token_type"] == "bearer"
+        assert login_data["status"] == 1
+        assert login_data["message"] == "Access token generated successfully"
+        assert "access_token" in login_data["data"] and login_data["data"]["token_type"] == "bearer"
 
     @pytest.mark.asyncio
     async def test_login_with_wrong_password(self, async_client: AsyncClient, test_user_data, session_api_key_headers):
@@ -170,7 +176,7 @@ class TestUserProfile:
         login_data, _ = await login_user(async_client, user["email"], user["pwd"])
 
         # Test authenticated access
-        profile_data, profile_status = await get_user_profile(async_client, login_data["access_token"])
+        profile_data, profile_status = await get_user_profile(async_client, login_data["data"]["access_token"])
         assert profile_status == status.HTTP_200_OK
         assert profile_data["data"]["email"] == user["email"]
 
@@ -191,7 +197,7 @@ class TestUserProfile:
         assert login_status == status.HTTP_200_OK
 
         # Get profile
-        profile_data, profile_status = await get_user_profile(async_client, login_data["access_token"])
+        profile_data, profile_status = await get_user_profile(async_client, login_data["data"]["access_token"])
         assert profile_status == status.HTTP_200_OK
         assert profile_data["data"]["id"] == user_id
         assert profile_data["data"]["email"] == user["email"]
