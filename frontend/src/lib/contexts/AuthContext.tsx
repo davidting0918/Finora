@@ -101,11 +101,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Login with Google OAuth token
    */
   const loginWithGoogle = async (googleToken: string): Promise<void> => {
+    console.log('🔥 AuthContext.loginWithGoogle called with token length:', googleToken?.length)
     setIsLoading(true)
 
     try {
       const googleRequest: GoogleLoginRequest = { token: googleToken }
+      console.log('📤 Sending Google login request to backend...')
+
       const response = await authService.loginWithGoogle(googleRequest)
+      console.log('📥 Google login response received:', {
+        hasAccessToken: !!response.access_token,
+        tokenType: response.token_type,
+        user: response.user
+      })
 
       // Set auth state
       setToken(response.access_token)
@@ -122,8 +130,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         source: 'google'
       }))
 
+      console.log('✅ Google login completed successfully in AuthContext')
+
     } catch (error) {
-      console.error('Google login failed:', error)
+      console.error('❌ Google login failed in AuthContext:', error)
       throw error
     } finally {
       setIsLoading(false)

@@ -36,10 +36,20 @@ export class AuthService {
    * Login with Google OAuth token
    */
   async loginWithGoogle(googleRequest: GoogleLoginRequest): Promise<LoginResponse> {
+    console.log('🌐 AuthService.loginWithGoogle - Making API call to:', API_ENDPOINTS.auth.googleLogin)
+    console.log('🔑 Request payload:', { tokenLength: googleRequest.token?.length })
+
     const response = await apiClient.post<ApiResponse<LoginResponse>>(
       API_ENDPOINTS.auth.googleLogin,
       googleRequest
     )
+
+    console.log('📡 API Response received:', {
+      status: response.status,
+      hasData: !!response.data,
+      hasAccessToken: !!response.data?.access_token,
+      message: response.message
+    })
 
     // Store token after successful login
     apiClient.setToken(response.data.access_token)

@@ -141,6 +141,7 @@ class AuthService:
                 name=google_user_info.name,
                 created_at=int(dt.now(tz.utc).timestamp()),
                 updated_at=int(dt.now(tz.utc).timestamp()),
+                source="google",
                 is_active=True,
             )
             await self.db.insert_one(user_collection, new_user.model_dump())

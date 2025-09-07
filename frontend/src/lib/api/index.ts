@@ -4,7 +4,7 @@
  */
 
 // Export configuration
-export { API_CONFIG, API_ENDPOINTS, getCurrentApiConfig, getEnvironment } from './config'
+export { API_CONFIG, API_ENDPOINTS, getCurrentApiConfig, getCurrentAppConfig, getGoogleConfig, getEnvironment } from './config'
 
 // Export client
 export { ApiClient, apiClient, type ApiError } from './client'

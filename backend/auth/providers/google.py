@@ -12,6 +12,8 @@ class GoogleAuthProvider:
     async def verify_token(self, token: str) -> GoogleUserInfo:
         try:
             id_info = id_token.verify_oauth2_token(token, google_requests.Request(), self.client_id)
-            return GoogleUserInfo(**id_info)
+            return GoogleUserInfo(
+                id=id_info["sub"], email=id_info["email"], name=id_info["name"], picture=id_info["picture"]
+            )
         except Exception as e:
             raise e

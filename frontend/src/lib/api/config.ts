@@ -11,18 +11,31 @@ export interface ApiConfig {
   }
 }
 
-export interface EnvironmentConfig {
-  staging: ApiConfig
-  production: ApiConfig
+export interface GoogleConfig {
+  clientId: string
 }
 
-// Environment-specific API configurations
-export const API_CONFIG: EnvironmentConfig = {
+export interface AppConfig extends ApiConfig {
+  google: GoogleConfig
+}
+
+export interface EnvironmentConfig {
+  staging: AppConfig
+  production: AppConfig
+}
+
+// Environment-specific configurations
+export const APP_CONFIG: EnvironmentConfig = {
   staging: {
     baseURL: 'http://localhost:8000',
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json'
+    },
+    google: {
+      // You need to replace this with your actual Google Client ID
+      // Get it from https://console.developers.google.com/
+      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id-here.apps.googleusercontent.com'
     }
   },
   production: {
@@ -30,9 +43,16 @@ export const API_CONFIG: EnvironmentConfig = {
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json'
+    },
+    google: {
+      // Production Google Client ID (same as staging for this project)
+      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id-here.apps.googleusercontent.com'
     }
   }
 }
+
+// Backward compatibility - keep the old API_CONFIG for existing code
+export const API_CONFIG: EnvironmentConfig = APP_CONFIG
 
 // Environment detection
 export const getEnvironment = (): 'staging' | 'production' => {
@@ -50,10 +70,22 @@ export const getEnvironment = (): 'staging' | 'production' => {
   return 'production'
 }
 
-// Get current API configuration
+// Get current API configuration (backward compatibility)
 export const getCurrentApiConfig = (): ApiConfig => {
   const environment = getEnvironment()
-  return API_CONFIG[environment]
+  return APP_CONFIG[environment]
+}
+
+// Get current app configuration (includes Google config)
+export const getCurrentAppConfig = (): AppConfig => {
+  const environment = getEnvironment()
+  return APP_CONFIG[environment]
+}
+
+// Get Google configuration
+export const getGoogleConfig = (): GoogleConfig => {
+  const config = getCurrentAppConfig()
+  return config.google
 }
 
 // API endpoints

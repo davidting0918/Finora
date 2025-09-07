@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,12 +12,12 @@ import {
   ArrowRight,
   Sparkles,
   AlertCircle,
-  Chrome,
   Loader2
 } from 'lucide-react'
 import { AuthLayout } from '../components/layout/AuthLayout'
 import { GlassCard } from '../components/ui/GlassCard'
 import { useAuth } from '../lib/contexts/AuthContext'
+import { googleAuthService } from '../lib/services/googleAuth'
 import type { ApiError } from '../lib/api'
 
 // Form validation schema
@@ -31,10 +31,11 @@ type LoginFormData = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [isGoogleInitialized, setIsGoogleInitialized] = useState(false)
   const navigate = useNavigate()
   const { login, loginWithGoogle, isAuthenticated } = useAuth()
+  const googleInitialized = useRef(false)
 
   const {
     register,
@@ -50,6 +51,76 @@ export default function LoginPage() {
       navigate('/dashboard', { replace: true })
     }
   }, [isAuthenticated, navigate])
+
+  // Initialize Google OAuth on component mount
+  useEffect(() => {
+    const initializeGoogle = async () => {
+      if (googleInitialized.current) return
+
+      try {
+        console.log('🔧 Starting Google OAuth initialization...')
+        console.log('🔍 Google Client ID:', googleAuthService.getClientId())
+
+        await googleAuthService.initializeGoogle()
+        googleAuthService.initializeGoogleSignIn({
+          onSuccess: handleGoogleSuccess,
+          onError: handleGoogleError,
+        })
+
+        // Also render a native Google button as fallback
+        setTimeout(() => {
+          try {
+            googleAuthService.renderButton('google-signin-button', {
+              onSuccess: handleGoogleSuccess,
+              onError: handleGoogleError,
+            })
+            console.log('✅ Native Google button rendered successfully')
+          } catch (error) {
+            console.warn('⚠️ Failed to render native Google button (this is optional):', error)
+          }
+        }, 100)
+
+        setIsGoogleInitialized(true)
+        googleInitialized.current = true
+        console.log('✅ Google OAuth initialized successfully')
+      } catch (error) {
+        console.error('❌ Failed to initialize Google OAuth:', error)
+        setErrorMessage('Failed to initialize Google Sign-In')
+      }
+    }
+
+    initializeGoogle()
+  }, [])
+
+  // Handle Google OAuth success
+  const handleGoogleSuccess = async (credential: string) => {
+    console.log('🎯 handleGoogleSuccess called with credential length:', credential?.length)
+    setErrorMessage('')
+
+    try {
+      console.log('🔐 Google credential received, calling loginWithGoogle...')
+      console.log('🔍 Credential preview:', credential.substring(0, 50) + '...')
+
+      await loginWithGoogle(credential)
+      console.log('✅ Google login successful, navigating to dashboard')
+      navigate('/dashboard')
+    } catch (error) {
+      const apiError = error as ApiError
+      console.error('❌ Google login failed:', error)
+      console.error('❌ Error details:', {
+        message: apiError.message,
+        status: apiError.status,
+        details: apiError.details
+      })
+      setErrorMessage(apiError.message || 'Google login failed')
+    }
+  }
+
+  // Handle Google OAuth error
+  const handleGoogleError = (error: string) => {
+    console.error('❌ Google OAuth error:', error)
+    setErrorMessage(error || 'Google authentication failed')
+  }
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
@@ -67,28 +138,6 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true)
-    setErrorMessage('')
-
-    try {
-      // Note: In a real implementation, you would integrate with Google OAuth
-      // This is a placeholder for Google OAuth integration
-      console.warn('Google OAuth integration not yet implemented')
-      setErrorMessage('Google login feature is not yet implemented, please use email login')
-
-      // Example implementation would be:
-      // const googleToken = await getGoogleOAuthToken()
-      // await loginWithGoogle(googleToken)
-      // navigate('/dashboard')
-    } catch (error) {
-      const apiError = error as ApiError
-      setErrorMessage(apiError.message || 'Google login failed')
-      console.error('Google login error:', error)
-    } finally {
-      setIsGoogleLoading(false)
-    }
-  }
 
   return (
     <AuthLayout>
@@ -131,36 +180,17 @@ export default function LoginPage() {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mb-6"
           >
-            <motion.button
-              onClick={handleGoogleLogin}
-              disabled={isGoogleLoading || isLoading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center justify-center space-x-3 p-3 rounded-lg bg-white hover:bg-gray-50 border border-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <AnimatePresence mode="wait">
-                {isGoogleLoading ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                  >
-                    <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                  >
-                    <Chrome className="w-5 h-5 text-gray-600" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <span className="font-medium text-gray-700">
-                {isGoogleLoading ? 'Signing in...' : 'Continue with Google'}
-              </span>
-            </motion.button>
+            {/* Native Google Button */}
+            {isGoogleInitialized ? (
+              <div className="relative">
+                <div id="google-signin-button" className="w-full flex justify-center"></div>
+              </div>
+            ) : (
+              <div className="w-full flex items-center justify-center space-x-3 p-3 rounded-lg bg-white border border-gray-300 opacity-50">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
+                <span className="font-medium text-gray-700">Initializing Google Sign-In...</span>
+              </div>
+            )}
           </motion.div>
 
           {/* Divider */}
@@ -325,7 +355,7 @@ export default function LoginPage() {
             >
               <motion.button
                 type="submit"
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading}
                 whileHover={!isLoading ? { scale: 1.02 } : {}}
                 whileTap={!isLoading ? { scale: 0.98 } : {}}
                 className="w-full flex items-center justify-center space-x-2 p-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
