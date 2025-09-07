@@ -59,7 +59,7 @@ export function getPasswordStrength(password: string): {
   if (password.length >= 6) score++
   if (password.length >= 10) score++
 
-  // 字符類型檢查
+  // Character type checks
   if (/[a-z]/.test(password)) score++
   if (/[A-Z]/.test(password)) score++
   if (/\d/.test(password)) score++
