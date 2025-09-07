@@ -1,5 +1,5 @@
 // =============================================================================
-// Authentication & User Types (Login-focused)
+// Authentication & User Types
 // =============================================================================
 
 export interface User {
@@ -28,6 +28,12 @@ export interface EmailLoginRequest {
   pwd: string
 }
 
+export interface CreateUserRequest {
+  name: string
+  email: string
+  pwd: string  // Backend expects 'pwd', not 'password'
+}
+
 export interface GoogleLoginRequest {
   token: string
 }
@@ -53,37 +59,13 @@ export interface TokenResponse {
 }
 
 // =============================================================================
-// Google Auth Types
-// =============================================================================
-
-export interface GoogleUserInfo {
-  id: string
-  email: string
-  name: string
-  picture: string
-}
-
-// =============================================================================
-// Token Management
-// =============================================================================
-
-export interface AccessToken {
-  token: string
-  user_id: string
-  created_at: number
-  expires_at: number
-  is_active: boolean
-}
-
-// =============================================================================
-// API Response Wrapper
+// API Response Wrapper (Backend Format)
 // =============================================================================
 
 export interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  message?: string
-  error?: string
+  status: number
+  data: T
+  message: string
 }
 
 // =============================================================================
@@ -112,8 +94,8 @@ export interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   loginWithGoogle: (googleToken: string) => Promise<void>
+  signup: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
-  refreshToken: () => Promise<void>
 }
 
 // =============================================================================
