@@ -45,8 +45,13 @@ export const APP_CONFIG: EnvironmentConfig = {
       'Content-Type': 'application/json'
     },
     google: {
-      // Production Google Client ID (same as staging for this project)
-      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id-here.apps.googleusercontent.com'
+      // Production Google Client ID (must be set via environment variable)
+      clientId: (() => {
+        if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+          throw new Error('REACT_APP_GOOGLE_CLIENT_ID must be set in production environment');
+        }
+        return process.env.REACT_APP_GOOGLE_CLIENT_ID;
+      })()
     }
   }
 }
