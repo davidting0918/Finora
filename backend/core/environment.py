@@ -108,6 +108,7 @@ class EnvironmentConfig:
                 "log_level": "DEBUG",
                 "cors_origins": [
                     "http://localhost:3000",
+                    "http://localhost:3001",
                     "https://finora-staging.vercel.app",
                     "https://staging.finora.app",
                 ],
