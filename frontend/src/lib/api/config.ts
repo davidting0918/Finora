@@ -33,9 +33,7 @@ export const APP_CONFIG: EnvironmentConfig = {
       'Content-Type': 'application/json'
     },
     google: {
-      // You need to replace this with your actual Google Client ID
-      // Get it from https://console.developers.google.com/
-      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id-here.apps.googleusercontent.com'
+      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || ''
     }
   },
   production: {
@@ -45,7 +43,6 @@ export const APP_CONFIG: EnvironmentConfig = {
       'Content-Type': 'application/json'
     },
     google: {
-      // Production Google Client ID (must be set via environment variable)
       clientId: (() => {
         if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
           throw new Error('REACT_APP_GOOGLE_CLIENT_ID must be set in production environment');
@@ -104,5 +101,23 @@ export const API_ENDPOINTS = {
   user: {
     create: '/user/create',  // User registration endpoint (requires API key)
     me: '/user/me'          // Get current user info (requires Bearer token)
+  },
+  // Transaction endpoints
+  transaction: {
+    create: '/transaction/create',
+    info: '/transaction/info',           // GET /transaction/info/{transaction_id}
+    list: '/transaction/list',
+    update: '/transaction/update',       // POST /transaction/update/{transaction_id}
+    delete: '/transaction/delete',       // POST /transaction/delete/{transaction_id}
+    categories: '/transaction/category',
+    subcategories: '/transaction/subcategory' // GET /transaction/subcategory/{category_id}
+  },
+  // Analytics endpoints
+  analytics: {
+    overview: '/analytics/overview',
+    categoryBreakdown: '/analytics/category-breakdown',
+    spendingTrends: '/analytics/spending-trends',
+    financialSummary: '/analytics/financial-summary',
+    tagAnalytics: '/analytics/tag-analytics'
   }
 } as const

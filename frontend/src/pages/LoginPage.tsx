@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -52,6 +52,36 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, navigate])
 
+  // Handle Google OAuth success
+  const handleGoogleSuccess = useCallback(async (credential: string) => {
+    console.log('🎯 handleGoogleSuccess called with credential length:', credential?.length)
+    setErrorMessage('')
+
+    try {
+      console.log('🔐 Google credential received, calling loginWithGoogle...')
+      console.log('🔍 Credential preview:', credential.substring(0, 50) + '...')
+
+      await loginWithGoogle(credential)
+      console.log('✅ Google login successful, navigating to dashboard')
+      navigate('/dashboard')
+    } catch (error) {
+      const apiError = error as ApiError
+      console.error('❌ Google login failed:', error)
+      console.error('❌ Error details:', {
+        message: apiError.message,
+        status: apiError.status,
+        details: apiError.details
+      })
+      setErrorMessage(apiError.message || 'Google login failed')
+    }
+  }, [loginWithGoogle, navigate])
+
+  // Handle Google OAuth error
+  const handleGoogleError = useCallback((error: string) => {
+    console.error('❌ Google OAuth error:', error)
+    setErrorMessage(error || 'Google authentication failed')
+  }, [])
+
   // Initialize Google OAuth on component mount
   useEffect(() => {
     const initializeGoogle = async () => {
@@ -90,37 +120,7 @@ export default function LoginPage() {
     }
 
     initializeGoogle()
-  }, [])
-
-  // Handle Google OAuth success
-  const handleGoogleSuccess = async (credential: string) => {
-    console.log('🎯 handleGoogleSuccess called with credential length:', credential?.length)
-    setErrorMessage('')
-
-    try {
-      console.log('🔐 Google credential received, calling loginWithGoogle...')
-      console.log('🔍 Credential preview:', credential.substring(0, 50) + '...')
-
-      await loginWithGoogle(credential)
-      console.log('✅ Google login successful, navigating to dashboard')
-      navigate('/dashboard')
-    } catch (error) {
-      const apiError = error as ApiError
-      console.error('❌ Google login failed:', error)
-      console.error('❌ Error details:', {
-        message: apiError.message,
-        status: apiError.status,
-        details: apiError.details
-      })
-      setErrorMessage(apiError.message || 'Google login failed')
-    }
-  }
-
-  // Handle Google OAuth error
-  const handleGoogleError = (error: string) => {
-    console.error('❌ Google OAuth error:', error)
-    setErrorMessage(error || 'Google authentication failed')
-  }
+  }, [handleGoogleSuccess, handleGoogleError])
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)

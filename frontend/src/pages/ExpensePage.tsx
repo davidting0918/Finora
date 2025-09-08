@@ -1,0 +1,12 @@
+import { DashboardLayout } from '../components/layout/DashboardLayout'
+
+export default function ExpensesPage() {
+  return (
+    <DashboardLayout>
+      <div className="p-6">
+        <h1 className="text-3xl font-bold text-white mb-4">Expenses</h1>
+        <p className="text-gray-400">Expenses page content coming soon...</p>
+      </div>
+    </DashboardLayout>
+  )
+}

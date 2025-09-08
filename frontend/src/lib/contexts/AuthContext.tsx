@@ -3,7 +3,7 @@
  * Provides authentication state and methods throughout the application
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { authService } from '../api'
 import type { AuthUser, EmailLoginRequest, GoogleLoginRequest, CreateUserRequest } from '../types'
 
@@ -34,15 +34,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!token && !!user
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    initializeAuth()
+  /**
+   * Logout user - clear all auth data
+   */
+  const logout = useCallback(async (): Promise<void> => {
+    setIsLoading(true)
+
+    try {
+      // Clear API client token
+      authService.logout()
+
+      // Clear localStorage data
+      localStorage.removeItem('finora_user_info')
+
+      // Clear local state
+      setToken(null)
+      setUser(null)
+
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   /**
    * Initialize authentication state from stored data
    */
-  const initializeAuth = async () => {
+  const initializeAuth = useCallback(async () => {
     try {
       const storedToken = authService.getToken()
       const storedUserInfo = localStorage.getItem('finora_user_info')
@@ -62,7 +81,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [logout])
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    initializeAuth()
+  }, [initializeAuth])
 
   /**
    * Login with email and password
@@ -174,29 +198,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
 
-  /**
-   * Logout user - clear all auth data
-   */
-  const logout = async (): Promise<void> => {
-    setIsLoading(true)
-
-    try {
-      // Clear API client token
-      authService.logout()
-
-      // Clear localStorage data
-      localStorage.removeItem('finora_user_info')
-
-      // Clear local state
-      setToken(null)
-      setUser(null)
-
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const value: AuthContextType = {
     // State

@@ -5,6 +5,9 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import './index.css'
+import ExpensesPage from './pages/ExpensePage'
+import BudgetPage from './pages/BudgetPage'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/expenses" element={<ExpensesPage />} />
+            <Route path="/budget" element={<BudgetPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </div>
