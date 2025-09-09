@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Luxury cursor style - hide default cursor on login page */
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced font rendering for luxury feel */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
 @layer components {
   .glass-card {
     @apply backdrop-blur-md bg-gray-800/50 border border-gray-700/50 shadow-2xl;
@@ -21,6 +37,74 @@
 
   .glow-green {
     box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+
+  /* Luxury form enhancements */
+  .luxury-input {
+    @apply bg-black/40 backdrop-blur-xl border border-amber-500/30 rounded-2xl text-white placeholder-gray-400 font-light;
+    @apply focus:outline-none focus:border-amber-400/60 transition-all duration-300;
+    @apply shadow-lg shadow-amber-500/10 focus:shadow-amber-500/20;
+  }
+
+  /* Luxury button styles */
+  .luxury-button {
+    @apply relative overflow-hidden rounded-2xl;
+    @apply bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600;
+    @apply text-black font-light tracking-wide;
+    @apply shadow-2xl shadow-amber-500/30;
+    @apply transition-all duration-300;
+  }
+
+  .luxury-button:hover {
+    @apply shadow-3xl shadow-amber-500/50;
+    transform: translateY(-2px);
+  }
+
+  /* Premium glass effect */
+  .premium-glass {
+    @apply bg-black/40 backdrop-blur-2xl border border-amber-500/20;
+    @apply shadow-2xl shadow-black/50;
+  }
+
+  /* Floating animation */
+  @keyframes luxury-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+
+  .luxury-float {
+    animation: luxury-float 6s ease-in-out infinite;
+  }
+
+  /* Shimmer effect */
+  @keyframes luxury-shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+  }
+
+  .luxury-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(251, 191, 36, 0.2),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: luxury-shimmer 3s infinite;
+  }
+
+  /* Pulse glow effect */
+  @keyframes luxury-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(251, 191, 36, 0.6);
+    }
+  }
+
+  .luxury-pulse {
+    animation: luxury-pulse 3s ease-in-out infinite;
   }
 }
 
