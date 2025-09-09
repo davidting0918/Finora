@@ -19,9 +19,13 @@ async def validate_google_login_route(request: GoogleAuthRequest):
     token_info = await auth_service.get_or_create_token(user.id)
 
     return {
-        "access_token": token_info["access_token"],
-        "token_type": token_info["token_type"],
-        "user": {"id": user.id, "email": user.email, "name": user.name},
+        "status": 1,
+        "data": {
+            "access_token": token_info["access_token"],
+            "token_type": token_info["token_type"],
+            "user": {"id": user.id, "email": user.email, "name": user.name},
+        },
+        "message": "Google login successful",
     }
 
 
@@ -34,9 +38,13 @@ async def validate_email_login_route(request: EmailAuthRequest):
     token_info = await auth_service.get_or_create_token(user.id)
 
     return {
-        "access_token": token_info["access_token"],
-        "token_type": token_info["token_type"],
-        "user": {"id": user.id, "email": user.email, "name": user.name},
+        "status": 1,
+        "data": {
+            "access_token": token_info["access_token"],
+            "token_type": token_info["token_type"],
+            "user": {"id": user.id, "email": user.email, "name": user.name},
+        },
+        "message": "Email login successful",
     }
 
 
@@ -48,4 +56,8 @@ async def get_access_token_route(form_data: Annotated[OAuth2PasswordRequestForm,
 
     token_info = await auth_service.get_or_create_token(user.id)
 
-    return {"access_token": token_info["access_token"], "token_type": token_info["token_type"]}
+    return {
+        "status": 1,
+        "data": {"access_token": token_info["access_token"], "token_type": token_info["token_type"]},
+        "message": "Access token generated successfully",
+    }

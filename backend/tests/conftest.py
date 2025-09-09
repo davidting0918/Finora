@@ -131,7 +131,7 @@ async def test_user_with_auth(test_user_data, async_client, session_api_key_head
 @pytest_asyncio.fixture(scope="session")
 async def session_auth_headers(test_user_with_auth):
     """Get authentication headers for the entire test session"""
-    return {"Authorization": f"Bearer {test_user_with_auth['access_token']}"}
+    return {"Authorization": f"Bearer {test_user_with_auth['data']['access_token']}"}
 
 
 @pytest_asyncio.fixture(scope="session")
