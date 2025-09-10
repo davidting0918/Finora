@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { GlassCard } from '../components/ui/GlassCard'
 import { useAuth } from '../lib/contexts/AuthContext'
+import ParticleRing from '../components/effects/ParticleRing'
 import type { ApiError } from '../lib/api'
 
 // Form validation schema
@@ -51,7 +52,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
         <div className="absolute inset-0">
           {/* Base texture */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 via-gray-900/30 to-black/50" />
-          
+
           {/* Noise texture overlay */}
           <div
             className="absolute inset-0 opacity-[0.03]"
@@ -60,7 +61,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
               backgroundSize: '256px 256px'
             }}
           />
-          
+
           {/* Subtle diamond pattern */}
           <div className="absolute inset-0 opacity-[0.015]">
             <div className="w-full h-full" style={{
@@ -70,109 +71,67 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Enhanced Visible Floating Orbs - Blue/Purple/Emerald */}
-        {Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: 120 + i * 20,
-              height: 120 + i * 20,
-              background: i % 3 === 0 
-                ? `radial-gradient(circle, rgba(59, 130, 246, ${0.25 - i * 0.02}) 0%, rgba(37, 99, 235, ${0.18 - i * 0.015}) 30%, rgba(29, 78, 216, ${0.1 - i * 0.01}) 60%, transparent 100%)`
-                : i % 3 === 1
-                  ? `radial-gradient(circle, rgba(139, 92, 246, ${0.25 - i * 0.02}) 0%, rgba(124, 58, 237, ${0.18 - i * 0.015}) 30%, rgba(109, 40, 217, ${0.1 - i * 0.01}) 60%, transparent 100%)`
-                  : `radial-gradient(circle, rgba(16, 185, 129, ${0.25 - i * 0.02}) 0%, rgba(5, 150, 105, ${0.18 - i * 0.015}) 30%, rgba(4, 120, 87, ${0.1 - i * 0.01}) 60%, transparent 100%)`,
-              filter: 'blur(0.5px)',
-              left: `${3 + (i % 4) * 30}%`,
-              top: `${8 + (i % 3) * 35}%`,
-              boxShadow: i % 3 === 0 
-                ? `0 0 30px rgba(59, 130, 246, ${0.2 - i * 0.02})`
-                : i % 3 === 1
-                  ? `0 0 30px rgba(139, 92, 246, ${0.2 - i * 0.02})`
-                  : `0 0 30px rgba(16, 185, 129, ${0.2 - i * 0.02})`,
-            }}
-            animate={{
-              x: ['-8%', '18%', '-8%'],
-              y: ['-8%', '12%', '-8%'],
-              rotate: [0, 180, 360],
-              scale: [0.9, 1.2, 0.9],
-              opacity: [0.7, 1, 0.7],
-            }}
-            transition={{
-              duration: 14 + i * 3,
-              repeat: Infinity,
-              ease: 'linear',
-              delay: i * 2,
-            }}
+        {/* 3D 粒子環效果 - 註冊頁面版本 */}
+        <div className="absolute inset-0 overflow-hidden z-0">
+          <ParticleRing
+            height="100vh"
+            autoRotate={true}
+            interactive={true}
+            cameraPosition={[11, -6, -7]}
+            ambientIntensity={0.25}
+            className="opacity-65"
+            showHint={false}
           />
-        ))}
+        </div>
 
-        {/* Premium geometric elements */}
-        <div className="absolute inset-0 opacity-10">
-          {Array.from({ length: 15 }).map((_, i) => (
+        {/* 註冊頁面專屬的點綴元素 */}
+        <div className="absolute inset-0 opacity-4 pointer-events-none">
+          {Array.from({ length: 10 }).map((_, i) => (
             <motion.div
               key={i}
               className="absolute"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${10 + Math.random() * 80}%`,
+                top: `${10 + Math.random() * 80}%`,
               }}
             >
-              {i % 4 === 0 ? (
-                // Blue dots
+              {i % 3 === 0 ? (
                 <motion.div
-                  className="w-1 h-1 bg-blue-400/60 rounded-full shadow-lg shadow-blue-400/30"
+                  className="w-px h-px bg-emerald-300/50 rounded-full"
                   animate={{
                     opacity: [0, 1, 0],
-                    scale: [0, 1.2, 0],
+                    scale: [0, 1.5, 0],
                   }}
                   transition={{
-                    duration: 3,
+                    duration: 5,
                     repeat: Infinity,
-                    delay: i * 0.3,
+                    delay: i * 0.6,
                   }}
                 />
-              ) : i % 4 === 1 ? (
-                // Small rectangles
+              ) : i % 3 === 1 ? (
                 <motion.div
-                  className="w-2 h-px bg-gradient-to-r from-purple-500/40 to-transparent"
+                  className="w-2 h-px bg-gradient-to-r from-transparent via-blue-300/25 to-transparent"
                   animate={{
                     opacity: [0, 0.8, 0],
                     scaleX: [0, 1, 0],
                   }}
                   transition={{
-                    duration: 4,
+                    duration: 6,
                     repeat: Infinity,
-                    delay: i * 0.4,
+                    delay: i * 0.9,
                   }}
                 />
-              ) : i % 4 === 2 ? (
-                // Tiny squares
+              ) : (
                 <motion.div
-                  className="w-0.5 h-0.5 bg-emerald-300/50 rotate-45"
+                  className="w-0.5 h-0.5 bg-purple-300/30 rotate-45"
                   animate={{
                     opacity: [0, 1, 0],
                     rotate: [45, 405, 45],
                   }}
                   transition={{
-                    duration: 5,
+                    duration: 7,
                     repeat: Infinity,
-                    delay: i * 0.5,
-                  }}
-                />
-              ) : (
-                // Subtle lines
-                <motion.div
-                  className="w-4 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent"
-                  animate={{
-                    opacity: [0, 0.6, 0],
-                    scaleX: [0.5, 1, 0.5],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    delay: i * 0.6,
+                    delay: i * 1.1,
                   }}
                 />
               )}
@@ -182,7 +141,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
 
         {/* Ambient light gradients */}
         <motion.div
-          className="absolute top-1/4 right-1/4 w-96 h-96"
+          className="absolute top-1/4 right-1/4 w-96 h-96 pointer-events-none"
           animate={{
             rotate: [0, 360],
             scale: [1, 1.1, 1],
@@ -193,7 +152,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
         </motion.div>
 
         <motion.div
-          className="absolute bottom-1/4 left-1/4 w-80 h-80"
+          className="absolute bottom-1/4 left-1/4 w-80 h-80 pointer-events-none"
           animate={{
             rotate: [360, 0],
             scale: [1.2, 0.8, 1.2],
@@ -204,7 +163,9 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
         </motion.div>
 
         {/* Dark Luxury Content - Signup Specific */}
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white" style={{ pointerEvents: 'none' }}>
+          {/* Allow specific interactive elements */}
+          <div style={{ pointerEvents: 'auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +211,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
                 />
               </div>
               <div>
-                <motion.h1 
+                <motion.h1
                   className="text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-200 via-purple-100 to-emerald-200 bg-clip-text text-transparent"
                   animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
@@ -260,7 +221,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
                 >
                   Finora
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   className="text-blue-300/80 text-sm font-light tracking-[0.3em] uppercase mt-1"
                   animate={{
                     opacity: [0.6, 1, 0.6],
@@ -290,7 +251,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 1 }}
             >
-              Begin your journey with our 
+              Begin your journey with our
               <span className="text-blue-200 font-medium"> exclusive platform</span> and unlock premium financial insights reserved for the discerning few.
             </motion.p>
           </motion.div>
@@ -303,21 +264,21 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
             transition={{ delay: 1.2, duration: 1 }}
           >
             {[
-              { 
-                icon: "🎯", 
-                title: "Exclusive Access", 
+              {
+                icon: "🎯",
+                title: "Exclusive Access",
                 desc: "Join a curated community of financial professionals",
                 accent: "blue"
               },
-              { 
-                icon: "⚡", 
-                title: "Instant Insights", 
+              {
+                icon: "⚡",
+                title: "Instant Insights",
                 desc: "Real-time analytics with zero compromise on quality",
                 accent: "purple"
               },
-              { 
-                icon: "🔐", 
-                title: "Premium Security", 
+              {
+                icon: "🔐",
+                title: "Premium Security",
                 desc: "Enterprise-grade protection for your financial data",
                 accent: "emerald"
               }
@@ -345,7 +306,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
                   />
                 </motion.div>
                 <div className="flex-1">
-                  <motion.h3 
+                  <motion.h3
                     className="text-lg font-medium text-blue-100 mb-2 group-hover:text-blue-50 transition-colors"
                   >
                     {feature.title}
@@ -369,6 +330,7 @@ function LuxuryAuthLayoutSignup({ children }: { children: React.ReactNode }) {
               Reserved for Excellence
             </p>
           </motion.div>
+          </div>
         </div>
       </motion.div>
 
